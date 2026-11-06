@@ -29,7 +29,7 @@ Many interests have piled up over the years...
 | AI agents and local inference | Projects include a GPT-3 explainer for Python errors, web retrieval for a custom GPT, inbound email for agents, and support for custom tool calls in local model inference. [Python error explainer](../../../ask_openai) · [Web crawler](../../../crawler-action) · [Local inference change](../../../fork-of-llama.cpp/commit/5c24c52) |
 | Linux, security, and reliability | Tools isolate coding agents in disposable containers, inspect Linux user and group ID mappings, and monitor host and container health. A companion collection documents practices for maintaining software over time. [Agent sandbox](https://numpde.github.io/safe-codex/) · [Container tools](../../../container-tools) · [Host monitoring](../../../tg-box-reporter) · [Development practices](https://numpde.github.io/best-practices/) |
 
-| Other projects and interests |  |
+| Misc |  |
 | --- | --- |
 | Cycling, cartography, and navigation | A route generator finds long rides with little backtracking in Nairobi’s Karura and Sigiria forests. An Android app detects departures from a GPX route, and an OpenStreetMap editor extension aligns reference images for tracing. [Forest routes](https://numpde.github.io/the-dark-side/) · [Source](../../../the-dark-side) · [Android navigation](../../../geepee) · [Map editor extension](../../../id-overlay) |
 | Mechanical design and parametric CAD | Models of metric threaded fasteners and a T25 socket use drawings and reference meshes to check dimensions before STEP or STL export. [Fastener models](../../../bolt-spec-v1) |
