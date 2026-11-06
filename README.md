@@ -1,4 +1,6 @@
-| Mathematics | Selected work |
+Many interests have piled up over the years...
+
+| Mathematics |  |
 | --- | --- |
 | Numerical analysis and scientific computing | A 2012 thesis studied the stability of space–time discretizations for parabolic equations. Later work combined wavelets in time with multigrid in space and developed numerical methods for computing the second moments of stochastic differential equations. [2012 thesis](https://doi.org/10.3929/ethz-a-007563932) · [Corrections](https://numpde.github.io/errata/) · [Parallel C++ implementation](../../../parabolic/tree/master/parawt/c%2B%2B) · [Stochastic ODEs](../../../sode2nd) |
 | Inverse problems and regularization | A 2015 paper uses interpolation spaces to characterize the convergence rates of Tikhonov regularization and Landweber iteration. [Paper](https://arxiv.org/abs/1503.05742) · [Corrections](https://numpde.github.io/errata/) |
@@ -8,7 +10,7 @@
 | Mathematical finance and decision analysis | A Black–Scholes derivation, an interactive net-present-value decision tree, and exercises in bond valuation, duration, and currency risk. [Black–Scholes notes](../../../math-notes/tree/master/20200520-BlackScholes) · [Decision tree](../../../npv-graph) · [Portfolio exercises](../../../misc/tree/master/homeworks/sa) |
 | Quantum information and algorithms | Python and Q# exercises reproduce Bell-state correlations, quantum teleportation, Simon’s algorithm, and period finding. [Code and exercises](../../../misc/tree/master/quantum/vazirani) |
 
-| Biology and chemistry | Selected work |
+| Biology and chemistry |  |
 | --- | --- |
 | Computational neuroscience and topology | Graphs of the *C. elegans* connectome and a rat cortical microcircuit support experiments on how removing connections changes cliques and the topological features measured by Betti numbers. [Connectome experiments](../../../as/tree/master/p/network) |
 | Cancer genomics and single-cell transcriptomics | A breast-cancer subtype classifier trained on bulk TCGA gene-expression data was applied to individual tumour cells. [PAM50 study](../../../as/tree/master/s/20180203-BCXX_PAM50) |
@@ -20,14 +22,14 @@
 | Cheminformatics and chemical data | One molecular graph can have many valid SMILES strings. GRIMACE determines which tokens can follow a given prefix for a specified molecule. Related work uses graph decomposition to enumerate those strings and collects experimental measurements from ChemRxiv papers for testing structure-prediction methods. [GRIMACE](https://numpde.github.io/grimace-py/) · [Code](../../../grimace-py) · [Graph decomposition](../../../grimace-factorized) · [ChemRxiv data](https://numpde.github.io/chemrxiv-data/) |
 | Molecular dynamics and quantum chemistry | A simulation pipeline samples molecular conformations in explicit solvent, clusters the conformers, and uses density functional theory to calculate NMR shieldings and spin–spin couplings. [Simulation and calculations](../../../playground/tree/main/20251031-MD-NMR) |
 
-| Software systems | Selected work |
+| Software systems |  |
 | --- | --- |
 | Scientific platforms and model deployment | A common API connects a browser workspace to independently operated NMR methods. Each provider supplies its scientific code. Shared tools handle jobs and save finished results for delivery when the API is available again. [Provider tools](../../../nmr-provider-tools) · [SECS integration](https://numpde.github.io/secs-repro/) |
 | Smart contracts, payments, and blockchain indexing | In dapp32, a contract describes the actions that a generic viewer can present. Examples include bicycle ownership and workshop permissions, escrow, and payment channels with signed vouchers. Work on the rindexer fork addresses PostgreSQL recovery when a chain reorganization replaces previously indexed blocks. [dapp32](https://numpde.github.io/dapp32/) · [Source](../../../dapp32) · [Payment protocol](../../../pay-to-play-wire) · [Indexer recovery](../../../fork-of-rindexer/pull/4) |
 | AI agents and local inference | Projects include a GPT-3 explainer for Python errors, web retrieval for a custom GPT, inbound email for agents, and support for custom tool calls in local model inference. [Python error explainer](../../../ask_openai) · [Web crawler](../../../crawler-action) · [Local inference change](../../../fork-of-llama.cpp/commit/5c24c52) |
 | Linux, security, and reliability | Tools isolate coding agents in disposable containers, inspect Linux user and group ID mappings, and monitor host and container health. A companion collection documents practices for maintaining software over time. [Agent sandbox](https://numpde.github.io/safe-codex/) · [Container tools](../../../container-tools) · [Host monitoring](../../../tg-box-reporter) · [Development practices](https://numpde.github.io/best-practices/) |
 
-| Other projects and interests | Selected work |
+| Other projects and interests |  |
 | --- | --- |
 | Cycling, cartography, and navigation | A route generator finds long rides with little backtracking in Nairobi’s Karura and Sigiria forests. An Android app detects departures from a GPX route, and an OpenStreetMap editor extension aligns reference images for tracing. [Forest routes](https://numpde.github.io/the-dark-side/) · [Source](../../../the-dark-side) · [Android navigation](../../../geepee) · [Map editor extension](../../../id-overlay) |
 | Mechanical design and parametric CAD | Models of metric threaded fasteners and a T25 socket use drawings and reference meshes to check dimensions before STEP or STL export. [Fastener models](../../../bolt-spec-v1) |
