@@ -1178,23 +1178,23 @@
       "archived": false,
       "empty": false,
       "created_at": "2023-12-26T23:24:26Z",
-      "description": "A Rust EVM indexer with event decoding, PostgreSQL storage, and GraphQL access; personal work addresses recovery and reorganization behavior.",
+      "description": "Ethereum and EVM blockchain indexing infrastructure for decentralized applications and Solidity smart contracts. Decodes contract event logs into PostgreSQL records and exposes queryable application history through GraphQL.",
       "description_confidence": "high",
       "categories": [
         "blockchain",
         "backend"
       ],
       "keywords": [
-        "rindexer",
-        "evm",
-        "blockchain-indexing",
-        "rust",
-        "postgresql",
-        "graphql",
-        "chain-reorganizations",
-        "recovery",
-        "event-decoding",
-        "cron"
+        "Ethereum",
+        "EVM",
+        "smart contracts",
+        "decentralized applications",
+        "blockchain event indexing",
+        "contract ABI decoding",
+        "on-chain transaction history",
+        "PostgreSQL",
+        "GraphQL",
+        "Rust"
       ],
       "github_topics": [],
       "languages": [
@@ -11033,23 +11033,23 @@
       "archived": false,
       "empty": false,
       "created_at": "2026-11-08T15:40:38Z",
-      "description": "A blockchain indexer that retrieves and decodes chain data, stores it in PostgreSQL, and handles reorganizations and recovery.",
+      "description": "Ethereum and EVM blockchain event indexing for applications that need reliable evidence of Solidity smart-contract activity, including payment collection. Retrieves blocks, transaction receipts, and contract logs through RPC, decodes their ABI, and stores canonical history in PostgreSQL for application queries.",
       "description_confidence": "high",
       "categories": [
         "backend",
         "blockchain"
       ],
       "keywords": [
-        "blockchain-indexing",
-        "evm",
-        "rpc",
-        "postgresql",
-        "chain-reorganizations",
-        "event-decoding",
-        "abi",
-        "recovery",
-        "python",
-        "http-api"
+        "Ethereum",
+        "EVM",
+        "smart contracts",
+        "decentralized applications",
+        "blockchain event indexing",
+        "contract ABI decoding",
+        "on-chain payment evidence",
+        "chain reorganizations",
+        "PostgreSQL",
+        "checkpoint-bound queries"
       ],
       "github_topics": [],
       "languages": [
@@ -12850,7 +12850,7 @@
       "archived": false,
       "empty": false,
       "created_at": "2023-05-19T18:49:30Z",
-      "description": "A protocol, generic viewers, and example contracts for user interfaces and workflows described by on-chain application manifests.",
+      "description": "A protocol and generic browser viewers for Ethereum and EVM decentralized applications whose Solidity smart contracts publish their user interfaces and workflows. Example applications implement bicycle NFT ownership, escrow settlement, and voucher-authorized payments; contracts enforce transaction authority while viewers interpret application manifests.",
       "description_confidence": "high",
       "categories": [
         "blockchain",
@@ -12858,16 +12858,16 @@
         "backend"
       ],
       "keywords": [
-        "smart-contracts",
-        "application-manifests",
-        "generic-viewer",
-        "on-chain-ui",
-        "workflows",
-        "ethereum",
-        "solidity",
-        "javascript",
-        "agents",
-        "protocol-design"
+        "Ethereum",
+        "EVM",
+        "smart contracts",
+        "decentralized applications",
+        "Solidity",
+        "contract application manifests",
+        "generic browser viewers",
+        "wallet transactions",
+        "NFT ownership",
+        "payment channels"
       ],
       "github_topics": [],
       "languages": [
@@ -20324,23 +20324,23 @@
       "archived": false,
       "empty": false,
       "created_at": "2026-10-21T22:09:00Z",
-      "description": "A Rust EVM indexer with event decoding, PostgreSQL storage, and GraphQL access; personal work addresses recovery and reorganization behavior.",
+      "description": "Ethereum and EVM blockchain event indexing for decentralized applications, with reliable recovery of Solidity smart-contract history. Extends a Rust indexer so decoded contract events, PostgreSQL records, and checkpoints remain consistent through interrupted processing and chain reorganizations.",
       "description_confidence": "high",
       "categories": [
         "blockchain",
         "backend"
       ],
       "keywords": [
-        "rindexer",
-        "evm",
-        "blockchain-indexing",
-        "rust",
-        "postgresql",
-        "graphql",
-        "chain-reorganizations",
-        "recovery",
-        "event-decoding",
-        "cron"
+        "Ethereum",
+        "EVM",
+        "smart contracts",
+        "decentralized applications",
+        "blockchain event indexing",
+        "contract ABI decoding",
+        "on-chain transaction history",
+        "chain reorganizations",
+        "durable checkpoints",
+        "PostgreSQL"
       ],
       "github_topics": [],
       "languages": [
@@ -39317,23 +39317,23 @@
       "archived": false,
       "empty": false,
       "created_at": "2022-06-26T13:39:20Z",
-      "description": "A test decentralized application for exercising MetaMask wallet behavior and transaction workflows.",
+      "description": "A browser decentralized application for exercising Ethereum wallet integration and smart-contract transaction workflows through MetaMask. Covers the client side of blockchain applications: wallet interaction and transaction behavior.",
       "description_confidence": "high",
       "categories": [
         "blockchain",
         "frontend"
       ],
       "keywords": [
-        "metamask",
-        "wallet",
-        "ethereum",
-        "dapp",
-        "end-to-end-testing",
-        "transactions",
-        "javascript",
-        "smart-contracts",
-        "web3",
-        "qa"
+        "Ethereum",
+        "smart contracts",
+        "decentralized applications",
+        "MetaMask",
+        "wallet integration",
+        "wallet transactions",
+        "end-to-end testing",
+        "JavaScript",
+        "Web3",
+        "browser application"
       ],
       "github_topics": [],
       "languages": [
@@ -54368,23 +54368,23 @@
       "archived": false,
       "empty": false,
       "created_at": "2023-05-23T21:10:44Z",
-      "description": "Deployment configurations for OpenGSN relay servers and their reverse-proxy integration.",
+      "description": "Deployment of OpenGSN transaction relays for Ethereum and Polygon decentralized applications. Relay infrastructure supports gas-sponsored smart-contract interactions through meta-transactions, with container and reverse-proxy configuration.",
       "description_confidence": "high",
       "categories": [
         "blockchain",
         "devops"
       ],
       "keywords": [
-        "opengsn",
-        "relay-servers",
-        "gas-sponsorship",
-        "ethereum",
-        "polygon",
+        "Ethereum",
+        "Polygon",
+        "smart contracts",
+        "decentralized applications",
+        "OpenGSN",
+        "gas sponsorship",
         "meta-transactions",
-        "deployment",
-        "reverse-proxy",
-        "configuration",
-        "containers"
+        "transaction relays",
+        "containers",
+        "reverse proxy"
       ],
       "github_topics": [],
       "languages": [],
@@ -57245,7 +57245,7 @@
       "archived": false,
       "empty": false,
       "created_at": "2026-11-02T21:27:10Z",
-      "description": "Accounting, voucher-signing, and settlement API code for metered service purchases.",
+      "description": "An accounting and settlement API for metered services paid through Ethereum smart-contract payment channels. Verifies signed invoices and cumulative payment vouchers, records purchase acceptances and allocations in PostgreSQL, and separates on-chain collection evidence from service admission and financial policy.",
       "description_confidence": "high",
       "categories": [
         "backend",
@@ -57253,16 +57253,16 @@
         "security"
       ],
       "keywords": [
-        "accounting",
+        "Ethereum",
+        "smart contracts",
+        "payment channels",
+        "payment vouchers",
+        "signed invoices",
+        "on-chain payment evidence",
         "settlement",
-        "invoices",
-        "vouchers",
-        "payments",
-        "signature-verification",
-        "service-purchases",
-        "python",
-        "blockchain-indexing",
-        "trust"
+        "signature verification",
+        "PostgreSQL",
+        "service accounting"
       ],
       "github_topics": [],
       "languages": [
@@ -57893,7 +57893,7 @@
       "archived": false,
       "empty": false,
       "created_at": "2026-10-22T14:39:27Z",
-      "description": "Python wire formats and verification for signed invoices, payment vouchers, and purchase acceptances.",
+      "description": "Python message formats and cryptographic verification for a service-payment protocol spanning off-chain purchases and Ethereum smart-contract payment channels. Encodes signed invoices, cumulative payment vouchers bound to a blockchain and contract, and signed purchase acceptances.",
       "description_confidence": "high",
       "categories": [
         "security",
@@ -57901,16 +57901,16 @@
         "library"
       ],
       "keywords": [
-        "signed-invoices",
-        "jws",
-        "payment-vouchers",
-        "purchase-acceptances",
-        "ed25519",
-        "pydantic",
-        "wire-protocol",
-        "python",
-        "cryptographic-signatures",
-        "trust"
+        "Ethereum",
+        "smart contracts",
+        "payment channels",
+        "payment vouchers",
+        "signed invoices",
+        "purchase acceptances",
+        "EIP-712 typed data",
+        "cryptographic signatures",
+        "Ed25519",
+        "wire protocol"
       ],
       "github_topics": [],
       "languages": [
@@ -60261,7 +60261,7 @@
       "archived": false,
       "empty": false,
       "created_at": "2022-06-22T11:29:06Z",
-      "description": "Python construction and encoding of EIP-712 typed structures for Ethereum signing workflows.",
+      "description": "Python construction, encoding, and hashing of EIP-712 typed messages for Ethereum wallets and smart contracts. Represents structured application values precisely so off-chain signatures can authorize on-chain actions.",
       "description_confidence": "high",
       "categories": [
         "blockchain",
@@ -60269,16 +60269,16 @@
         "library"
       ],
       "keywords": [
-        "eip712",
-        "typed-data",
-        "ethereum",
-        "signatures",
-        "encoding",
-        "python",
+        "Ethereum",
+        "smart contracts",
+        "EIP-712 typed data",
+        "wallet signatures",
+        "structured message encoding",
+        "cryptography",
         "hashing",
-        "structs",
-        "wallets",
-        "cryptography"
+        "off-chain authorization",
+        "Python",
+        "decentralized applications"
       ],
       "github_topics": [],
       "languages": [
@@ -87137,6 +87137,198 @@
       "merged_from": [
         "semantic:numpde/disable-workspace-switcher-popup--shared_principle--numpde/fork-of-popup-blocker"
       ]
+    },
+    {
+      "id": "semantic:project:joshstevens19/rindexer--complements--project:numpde/dapp32",
+      "source": "project:joshstevens19/rindexer",
+      "target": "project:numpde/dapp32",
+      "type": "complements",
+      "label": "Contract workflows and queryable event history",
+      "explanation": "The application framework publishes Solidity contract workflows and wallet actions; the indexer turns emitted contract events into database-backed history for those applications. This is a complementary capability, not a claim of an existing integration.",
+      "theme_ids": [
+        "provenance"
+      ],
+      "basis": "interpretive",
+      "confidence": "high",
+      "strength": 0.88,
+      "evidence": [
+        {
+          "repository_id": "github:joshstevens19/rindexer",
+          "field": "description"
+        },
+        {
+          "repository_id": "github:numpde/dapp32",
+          "field": "description"
+        }
+      ]
+    },
+    {
+      "id": "semantic:project:numpde/fork-of-rindexer--synergy--project:numpde/dapp32",
+      "source": "project:numpde/fork-of-rindexer",
+      "target": "project:numpde/dapp32",
+      "type": "synergy",
+      "label": "Reliable history for contract-defined applications",
+      "explanation": "A recovery-aware event index could supply transaction and ownership history to contract-defined application workflows, including payment and bicycle-registration examples, without asking the viewer to reconstruct all historical logs. This combination is prospective.",
+      "theme_ids": [
+        "provenance"
+      ],
+      "basis": "prospective",
+      "confidence": "high",
+      "strength": 0.88,
+      "evidence": [
+        {
+          "repository_id": "github:numpde/fork-of-rindexer",
+          "field": "description"
+        },
+        {
+          "repository_id": "github:numpde/dapp32",
+          "field": "description"
+        }
+      ]
+    },
+    {
+      "id": "semantic:project:numpde/conix--complements--project:numpde/dapp32",
+      "source": "project:numpde/conix",
+      "target": "project:numpde/dapp32",
+      "type": "complements",
+      "label": "Contract authority and canonical observation",
+      "explanation": "The application contracts enforce transactions and publish workflows, while the indexer records ABI-decoded events and historical state. The PayToPlay development fixtures provide a concrete setting for separating execution authority from observation of its results.",
+      "theme_ids": [
+        "provenance"
+      ],
+      "basis": "interpretive",
+      "confidence": "high",
+      "strength": 0.88,
+      "evidence": [
+        {
+          "repository_id": "github:numpde/conix",
+          "field": "description"
+        },
+        {
+          "repository_id": "github:numpde/dapp32",
+          "field": "description"
+        }
+      ]
+    },
+    {
+      "id": "semantic:project:numpde/conix--synergy--project:numpde/pay-to-play",
+      "source": "project:numpde/conix",
+      "target": "project:numpde/pay-to-play",
+      "type": "synergy",
+      "label": "Collection evidence for service settlement",
+      "explanation": "Checkpoint-bound contract events can establish which payment vouchers were collected, allowing the accounting service to reconcile payments while retaining its own financial acceptance policy. Historical fixtures exercise the setting; production indexer integration remains planned.",
+      "theme_ids": [
+        "provenance"
+      ],
+      "basis": "prospective",
+      "confidence": "high",
+      "strength": 0.88,
+      "evidence": [
+        {
+          "repository_id": "github:numpde/conix",
+          "field": "description"
+        },
+        {
+          "repository_id": "github:numpde/pay-to-play",
+          "field": "description"
+        }
+      ]
+    },
+    {
+      "id": "semantic:project:numpde/fork-of-rindexer--synergy--project:numpde/pay-to-play",
+      "source": "project:numpde/fork-of-rindexer",
+      "target": "project:numpde/pay-to-play",
+      "type": "synergy",
+      "label": "Recover payment history without losing settlement evidence",
+      "explanation": "Recovery-aware ingestion of payment-contract events could support reconstruction of collected funds after interruptions or reorganizations. The accounting service would still decide admissible payment evidence and invoice allocation; no deployed integration is asserted.",
+      "theme_ids": [
+        "provenance"
+      ],
+      "basis": "prospective",
+      "confidence": "high",
+      "strength": 0.88,
+      "evidence": [
+        {
+          "repository_id": "github:numpde/fork-of-rindexer",
+          "field": "description"
+        },
+        {
+          "repository_id": "github:numpde/pay-to-play",
+          "field": "description"
+        }
+      ]
+    },
+    {
+      "id": "semantic:project:numpde/fork-of-rindexer--shared_principle--project:numpde/py-eip712-structs",
+      "source": "project:numpde/fork-of-rindexer",
+      "target": "project:numpde/py-eip712-structs",
+      "type": "shared_principle",
+      "label": "Typed values must survive byte representations",
+      "explanation": "Lossless ABI decoding and typed-message encoding both require precise correspondence between structured Ethereum application values and bytes. One reads contract events and the other prepares signed authorizations; they use different encodings.",
+      "theme_ids": [
+        "provenance"
+      ],
+      "basis": "interpretive",
+      "confidence": "high",
+      "strength": 0.88,
+      "evidence": [
+        {
+          "repository_id": "github:numpde/fork-of-rindexer",
+          "field": "description"
+        },
+        {
+          "repository_id": "github:numpde/py-eip712-structs",
+          "field": "description"
+        }
+      ]
+    },
+    {
+      "id": "semantic:project:numpde/conix--complements--project:numpde/metamask-test-dapp",
+      "source": "project:numpde/conix",
+      "target": "project:numpde/metamask-test-dapp",
+      "type": "complements",
+      "label": "Submit a transaction and observe canonical results",
+      "explanation": "Wallet-facing transaction workflows exercise the client side of a decentralized application; a blockchain indexer supplies persistent event history and canonicality evidence for the resulting contract activity. The projects expose complementary sides of the transaction lifecycle.",
+      "theme_ids": [
+        "provenance"
+      ],
+      "basis": "interpretive",
+      "confidence": "high",
+      "strength": 0.88,
+      "evidence": [
+        {
+          "repository_id": "github:numpde/conix",
+          "field": "description"
+        },
+        {
+          "repository_id": "github:numpde/metamask-test-dapp",
+          "field": "description"
+        }
+      ]
+    },
+    {
+      "id": "semantic:project:numpde/conix--complements--project:numpde/opensea-js",
+      "source": "project:numpde/conix",
+      "target": "project:numpde/opensea-js",
+      "type": "complements",
+      "label": "Marketplace actions and indexed asset history",
+      "explanation": "Marketplace buying, selling, and bidding create application activity whose underlying contract events can be indexed into durable asset history. A marketplace SDK and a generic contract-event indexer expose different useful access paths; no direct integration is claimed.",
+      "theme_ids": [
+        "provenance"
+      ],
+      "basis": "interpretive",
+      "confidence": "high",
+      "strength": 0.88,
+      "evidence": [
+        {
+          "repository_id": "github:numpde/conix",
+          "field": "description"
+        },
+        {
+          "repository_id": "github:numpde/opensea-js",
+          "field": "description"
+        }
+      ]
     }
   ],
   "semantic_graph": {
@@ -88001,18 +88193,18 @@
     {
       "id": "project:numpde/conix",
       "name": "conix",
-      "description": "A blockchain indexer that retrieves and decodes chain data, stores it in PostgreSQL, and handles reorganizations and recovery.",
+      "description": "Ethereum and EVM blockchain event indexing for applications that need reliable evidence of Solidity smart-contract activity, including payment collection. Retrieves blocks, transaction receipts, and contract logs through RPC, decodes their ABI, and stores canonical history in PostgreSQL for application queries.",
       "keywords": [
-        "blockchain-indexing",
-        "evm",
-        "rpc",
-        "postgresql",
-        "chain-reorganizations",
-        "event-decoding",
-        "abi",
-        "recovery",
-        "python",
-        "http-api"
+        "Ethereum",
+        "EVM",
+        "smart contracts",
+        "decentralized applications",
+        "blockchain event indexing",
+        "contract ABI decoding",
+        "on-chain payment evidence",
+        "chain reorganizations",
+        "PostgreSQL",
+        "checkpoint-bound queries"
       ],
       "repository_ids": [
         "github:numpde/conix"
@@ -88021,7 +88213,8 @@
         "commit_count": 675,
         "first_activity_date": "2026-11-08",
         "last_activity_date": "2026-11-15"
-      }
+      },
+      "methods": "Acquire block-identified contract events and historical contract state, decode ABI values, maintain durable checkpoints, and distinguish canonical chain observations from consumer payment and settlement policy."
     },
     {
       "id": "project:numpde/fork-of-Consent-O-Matic",
@@ -88184,18 +88377,18 @@
     {
       "id": "project:numpde/dapp32",
       "name": "dapp32",
-      "description": "A protocol, generic viewers, and example contracts for user interfaces and workflows described by on-chain application manifests.",
+      "description": "A protocol and generic browser viewers for Ethereum and EVM decentralized applications whose Solidity smart contracts publish their user interfaces and workflows. Example applications implement bicycle NFT ownership, escrow settlement, and voucher-authorized payments; contracts enforce transaction authority while viewers interpret application manifests.",
       "keywords": [
-        "smart-contracts",
-        "application-manifests",
-        "generic-viewer",
-        "on-chain-ui",
-        "workflows",
-        "ethereum",
-        "solidity",
-        "javascript",
-        "agents",
-        "protocol-design"
+        "Ethereum",
+        "EVM",
+        "smart contracts",
+        "decentralized applications",
+        "Solidity",
+        "contract application manifests",
+        "generic browser viewers",
+        "wallet transactions",
+        "NFT ownership",
+        "payment channels"
       ],
       "repository_ids": [
         "github:numpde/dapp32"
@@ -88204,7 +88397,8 @@
         "commit_count": 2778,
         "first_activity_date": "2026-05-20",
         "last_activity_date": "2026-11-15"
-      }
+      },
+      "methods": "Load on-chain application manifests and contract ABIs, read blockchain state through RPC, and present wallet-authorized transactions and workflows through reusable viewers and agents."
     },
     {
       "id": "project:numpde/disable-workspace-switcher-popup",
@@ -89253,18 +89447,18 @@
     {
       "id": "project:numpde/metamask-test-dapp",
       "name": "metamask-test-dapp",
-      "description": "A test decentralized application for exercising MetaMask wallet behavior and transaction workflows.",
+      "description": "A browser decentralized application for exercising Ethereum wallet integration and smart-contract transaction workflows through MetaMask. Covers the client side of blockchain applications: wallet interaction and transaction behavior.",
       "keywords": [
-        "metamask",
-        "wallet",
-        "ethereum",
-        "dapp",
-        "end-to-end-testing",
-        "transactions",
-        "javascript",
-        "smart-contracts",
-        "web3",
-        "qa"
+        "Ethereum",
+        "smart contracts",
+        "decentralized applications",
+        "MetaMask",
+        "wallet integration",
+        "wallet transactions",
+        "end-to-end testing",
+        "JavaScript",
+        "Web3",
+        "browser application"
       ],
       "repository_ids": [
         "github:numpde/metamask-test-dapp"
@@ -89273,7 +89467,8 @@
         "commit_count": 0,
         "first_activity_date": null,
         "last_activity_date": null
-      }
+      },
+      "methods": "Exercise wallet behavior and application transaction workflows through a browser test dapp."
     },
     {
       "id": "project:numpde/metered_pipe",
@@ -89991,18 +90186,18 @@
     {
       "id": "project:numpde/opengsn-relay",
       "name": "opengsn-relay",
-      "description": "Deployment configurations for OpenGSN relay servers and their reverse-proxy integration.",
+      "description": "Deployment of OpenGSN transaction relays for Ethereum and Polygon decentralized applications. Relay infrastructure supports gas-sponsored smart-contract interactions through meta-transactions, with container and reverse-proxy configuration.",
       "keywords": [
-        "opengsn",
-        "relay-servers",
-        "gas-sponsorship",
-        "ethereum",
-        "polygon",
+        "Ethereum",
+        "Polygon",
+        "smart contracts",
+        "decentralized applications",
+        "OpenGSN",
+        "gas sponsorship",
         "meta-transactions",
-        "deployment",
-        "reverse-proxy",
-        "configuration",
-        "containers"
+        "transaction relays",
+        "containers",
+        "reverse proxy"
       ],
       "repository_ids": [
         "github:numpde/opengsn-relay"
@@ -90011,7 +90206,8 @@
         "commit_count": 4,
         "first_activity_date": "2023-05-23",
         "last_activity_date": "2026-07-17"
-      }
+      },
+      "methods": "Configure and deploy relay servers and their reverse-proxy routes to support sponsored application transactions."
     },
     {
       "id": "project:OpenNMT/OpenNMT-py",
@@ -90434,18 +90630,18 @@
     {
       "id": "project:numpde/pay-to-play",
       "name": "pay-to-play",
-      "description": "Accounting, voucher-signing, and settlement API code for metered service purchases.",
+      "description": "An accounting and settlement API for metered services paid through Ethereum smart-contract payment channels. Verifies signed invoices and cumulative payment vouchers, records purchase acceptances and allocations in PostgreSQL, and separates on-chain collection evidence from service admission and financial policy.",
       "keywords": [
-        "accounting",
+        "Ethereum",
+        "smart contracts",
+        "payment channels",
+        "payment vouchers",
+        "signed invoices",
+        "on-chain payment evidence",
         "settlement",
-        "invoices",
-        "vouchers",
-        "payments",
-        "signature-verification",
-        "service-purchases",
-        "python",
-        "blockchain-indexing",
-        "trust"
+        "signature verification",
+        "PostgreSQL",
+        "service accounting"
       ],
       "repository_ids": [
         "github:numpde/pay-to-play"
@@ -90454,23 +90650,24 @@
         "commit_count": 463,
         "first_activity_date": "2026-10-18",
         "last_activity_date": "2026-11-15"
-      }
+      },
+      "methods": "Verify invoice, voucher, and acceptance signatures against independently trusted identities; account for deposits and collected funds, admit purchases, and reconcile contract collection events with whole-invoice payments. Production indexer integration remains planned."
     },
     {
       "id": "project:numpde/pay-to-play-wire",
       "name": "pay-to-play-wire",
-      "description": "Python wire formats and verification for signed invoices, payment vouchers, and purchase acceptances.",
+      "description": "Python message formats and cryptographic verification for a service-payment protocol spanning off-chain purchases and Ethereum smart-contract payment channels. Encodes signed invoices, cumulative payment vouchers bound to a blockchain and contract, and signed purchase acceptances.",
       "keywords": [
-        "signed-invoices",
-        "jws",
-        "payment-vouchers",
-        "purchase-acceptances",
-        "ed25519",
-        "pydantic",
-        "wire-protocol",
-        "python",
-        "cryptographic-signatures",
-        "trust"
+        "Ethereum",
+        "smart contracts",
+        "payment channels",
+        "payment vouchers",
+        "signed invoices",
+        "purchase acceptances",
+        "EIP-712 typed data",
+        "cryptographic signatures",
+        "Ed25519",
+        "wire protocol"
       ],
       "repository_ids": [
         "github:numpde/pay-to-play-wire"
@@ -90479,7 +90676,8 @@
         "commit_count": 48,
         "first_activity_date": "2026-10-19",
         "last_activity_date": "2026-10-23"
-      }
+      },
+      "methods": "Canonicalize message encodings, hash typed voucher values with a chain-and-contract deployment domain, verify Ethereum voucher signatures, and verify invoice and acceptance signatures against independent Ed25519 trust inputs."
     },
     {
       "id": "project:numpde/phonepad",
@@ -90785,18 +90983,18 @@
     {
       "id": "project:numpde/py-eip712-structs",
       "name": "py-eip712-structs",
-      "description": "Python construction and encoding of EIP-712 typed structures for Ethereum signing workflows.",
+      "description": "Python construction, encoding, and hashing of EIP-712 typed messages for Ethereum wallets and smart contracts. Represents structured application values precisely so off-chain signatures can authorize on-chain actions.",
       "keywords": [
-        "eip712",
-        "typed-data",
-        "ethereum",
-        "signatures",
-        "encoding",
-        "python",
+        "Ethereum",
+        "smart contracts",
+        "EIP-712 typed data",
+        "wallet signatures",
+        "structured message encoding",
+        "cryptography",
         "hashing",
-        "structs",
-        "wallets",
-        "cryptography"
+        "off-chain authorization",
+        "Python",
+        "decentralized applications"
       ],
       "repository_ids": [
         "github:numpde/py-eip712-structs"
@@ -90805,7 +91003,8 @@
         "commit_count": 0,
         "first_activity_date": null,
         "last_activity_date": null
-      }
+      },
+      "methods": "Build typed structures and derive their signing representation, connecting structured application data to the exact bytes interpreted by wallets and contracts."
     },
     {
       "id": "project:numpde/pyaffy",
@@ -91101,18 +91300,18 @@
     {
       "id": "project:joshstevens19/rindexer",
       "name": "rindexer",
-      "description": "A Rust EVM indexer with event decoding, PostgreSQL storage, and GraphQL access; personal work addresses recovery and reorganization behavior.",
+      "description": "Ethereum and EVM blockchain indexing infrastructure for decentralized applications and Solidity smart contracts. Decodes contract event logs into PostgreSQL records and exposes queryable application history through GraphQL.",
       "keywords": [
-        "rindexer",
-        "evm",
-        "blockchain-indexing",
-        "rust",
-        "postgresql",
-        "graphql",
-        "chain-reorganizations",
-        "recovery",
-        "event-decoding",
-        "cron"
+        "Ethereum",
+        "EVM",
+        "smart contracts",
+        "decentralized applications",
+        "blockchain event indexing",
+        "contract ABI decoding",
+        "on-chain transaction history",
+        "PostgreSQL",
+        "GraphQL",
+        "Rust"
       ],
       "repository_ids": [
         "github:joshstevens19/rindexer"
@@ -91121,28 +91320,29 @@
         "commit_count": 0,
         "first_activity_date": null,
         "last_activity_date": null
-      }
+      },
+      "methods": "Read historical and live contract events through blockchain RPC, decode their ABI types, and build database-backed queries for application state and activity."
     },
     {
       "id": "project:numpde/fork-of-rindexer",
       "name": "rindexer-recovery",
-      "description": "A maintained EVM-indexer adaptation focused on durable recovery, reorganizations, checkpoint behavior, PostgreSQL handling, and lossless ABI conversion.",
+      "description": "Ethereum and EVM blockchain event indexing for decentralized applications, with reliable recovery of Solidity smart-contract history. Extends a Rust indexer so decoded contract events, PostgreSQL records, and checkpoints remain consistent through interrupted processing and chain reorganizations.",
       "keywords": [
-        "rindexer",
-        "evm",
-        "blockchain-indexing",
-        "rust",
-        "postgresql",
-        "graphql",
-        "chain-reorganizations",
-        "recovery",
-        "event-decoding",
-        "cron"
+        "Ethereum",
+        "EVM",
+        "smart contracts",
+        "decentralized applications",
+        "blockchain event indexing",
+        "contract ABI decoding",
+        "on-chain transaction history",
+        "chain reorganizations",
+        "durable checkpoints",
+        "PostgreSQL"
       ],
       "repository_ids": [
         "github:numpde/fork-of-rindexer"
       ],
-      "methods": "Recovery-state handling, ABI conversion checks, historical cron fixes, and PostgreSQL integration.",
+      "methods": "Decode smart-contract event logs without losing ABI values; recover indexed transaction history, repair PostgreSQL handling, and preserve processing checkpoints and historical scheduled operations.",
       "identity_rationale": "The maintained fork contains hundreds of distinct changes addressing recovery and operational behavior. It remains separate from the upstream general-purpose indexer.",
       "user_work": {
         "commit_count": 313,
