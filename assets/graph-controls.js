@@ -142,9 +142,11 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
   function scale(mode, key) {
     const values = [...info.values()].map(item => item[key]).filter(known);
     const min = mode.date && values.length ? Math.min(...values) : 0;
-    const max = mode.max ?? Math.max(0, ...values);
+    const max = mode.date ? new Date().setUTCHours(0, 0, 0, 0) : mode.max ?? Math.max(0, ...values);
     return { min, max, knownCount: values.length, ratio(value) {
       if (!known(value)) return null;
+      // A 30-day half-life concentrates date contrast near today.
+      if (mode.date) return 2 ** (-Math.max(0, max - value) / (30 * 86400000));
       if (max === min) return 0;
       return Math.max(0, Math.min(1, mode.log ? Math.log1p(value) / Math.log1p(max) : (value - min) / (max - min)));
     } };
