@@ -6,6 +6,7 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
   const edgeOptions = document.getElementById('edge-options');
   const legend = document.getElementById('legend-content');
   const parameters = new URLSearchParams(location.search);
+  const defaults = { color: 'commits', size: 'complexity' };
   const repositories = new Map(inventory.repositories.map(repo => [repo.id, repo]));
   const info = new Map(inventory.projects.map(project => {
     const members = project.repository_ids.map(id => repositories.get(id));
@@ -37,7 +38,7 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
     visibility: { label: 'Visibility', colors: new Map([['public', '#d3e3d2'], ['private', '#e6cdbd']]), labelFor: title },
     commits: { label: 'Personal commits', log: true },
     activity: { label: 'Last personal activity', date: true },
-    difficulty: { label: 'Contribution difficulty (estimate)', max: 100,
+    difficulty: { label: 'Contribution difficulty', max: 100,
       gradient: [[255, 247, 220], [239, 151, 57]] },
     connections: { label: 'Visible connections', log: true }
   };
@@ -46,12 +47,12 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
     commits: colorModes.commits,
     connections: colorModes.connections,
     repositories: { label: 'Repository count', log: true },
-    complexity: { label: 'Codebase complexity (estimate)', max: 100 },
+    complexity: { label: 'Codebase complexity', max: 100 },
     difficulty: colorModes.difficulty
   };
   function populate(select, modes, parameter) {
     for (const [value, mode] of Object.entries(modes)) select.add(new Option(mode.label, value));
-    select.value = Object.hasOwn(modes, parameters.get(parameter)) ? parameters.get(parameter) : 'none';
+    select.value = Object.hasOwn(modes, parameters.get(parameter)) ? parameters.get(parameter) : defaults[parameter];
   }
   populate(colorSelect, colorModes, 'color');
   populate(sizeSelect, sizeModes, 'size');
@@ -117,7 +118,7 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
   function writeURL() {
     const url = new URL(location.href);
     for (const [key, select] of [['color', colorSelect], ['size', sizeSelect]]) {
-      if (select.value === 'none') url.searchParams.delete(key);
+      if (select.value === defaults[key]) url.searchParams.delete(key);
       else url.searchParams.set(key, select.value);
     }
     for (const group of groups) {
@@ -258,8 +259,8 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
       embedded = nextEmbedded;
       if (restoreAppearance) {
         const current = new URLSearchParams(location.search);
-        colorSelect.value = Object.hasOwn(colorModes, current.get('color')) ? current.get('color') : 'none';
-        sizeSelect.value = Object.hasOwn(sizeModes, current.get('size')) ? current.get('size') : 'none';
+        colorSelect.value = Object.hasOwn(colorModes, current.get('color')) ? current.get('color') : defaults.color;
+        sizeSelect.value = Object.hasOwn(sizeModes, current.get('size')) ? current.get('size') : defaults.size;
       }
       controls.querySelectorAll('details').forEach(details => { details.open = false; });
       buildEdgeOptions();
