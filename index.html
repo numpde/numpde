@@ -465,7 +465,7 @@
         const row = document.createElement('div'), link = document.createElement('a');
         link.href = repo.url; link.target = '_blank'; link.rel = 'noopener noreferrer';
         link.textContent = repo.full_name;
-        row.append(link); bubble.append(row);
+        row.append(link, document.createTextNode(` · ${repo.visibility}`)); bubble.append(row);
       }
       positionNodeInfo();
     }
