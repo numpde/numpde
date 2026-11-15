@@ -87,6 +87,7 @@
   <aside id="node-info" role="dialog" aria-labelledby="node-info-name" hidden></aside>
   <script>
     const graph = document.getElementById('graph');
+    const nodeDisplayScale = 1.5;
     let cy = null;
     let arrangement = null;
     let selected = null;
@@ -202,6 +203,8 @@
       liveActive = true;
       if (document.hidden || liveFrame !== null) return;
       const stepsPerFrame = matchMedia('(prefers-reduced-motion: reduce)').matches ? 24 : 12;
+      // Measure the original geometry; larger rendering must not alter forces.
+      cy.nodes().addClass('physics-size');
       const bodies = cy.nodes(':visible').map(node => {
         const bounds = node.boundingBox({ includeOverlays: false });
         return {
@@ -210,6 +213,7 @@
           x: 0, y: 0, vx: 0, vy: 0, previousX: 0, previousY: 0
         };
       });
+      cy.nodes().removeClass('physics-size');
       const byId = new Map(bodies.map(body => [body.node.id(), body]));
       const center = bodies.reduce((point, body) => {
         const position = body.node.position();
@@ -429,12 +433,14 @@
       cy.userZoomingEnabled(false);
       pending.frame = requestAnimationFrame(() => {
         cy.resize();
+        cy.nodes().addClass('physics-size');
         cy.elements().not('.filtered-out').layout({
           name: 'cose', fit: false, animate: false, randomize: true,
           nodeDimensionsIncludeLabels: true, nodeRepulsion: 4500,
           nodeOverlap: 20, idealEdgeLength: edge => edge.data('length') ?? 65, componentSpacing: 32,
           gravity: 1, numIter: animateAfter ? 20 : 1000
         }).run();
+        cy.nodes().removeClass('physics-size');
         cy.one('render', pending.reveal);
         fitView();
         cy.forceRender();
@@ -634,13 +640,19 @@
         autounselectify: true, desktopTapThreshold: 5, touchTapThreshold: 8,
         style: [
           { selector: 'node', style: {
-            shape: 'round-rectangle', width: 'data(width)', height: 'data(height)', padding: 'data(padding)',
+            shape: 'round-rectangle', width: node => node.data('width') * nodeDisplayScale,
+            height: node => node.data('height') * nodeDisplayScale,
+            padding: node => node.data('padding') * nodeDisplayScale,
             label: 'data(label)', 'font-family': 'system-ui, sans-serif',
-            'font-size': 13, 'font-weight': 600, 'text-valign': 'center',
+            'font-size': 13 * nodeDisplayScale, 'font-weight': 600, 'text-valign': 'center',
             'text-halign': 'center', 'text-wrap': 'none', color: '#14212a',
             'background-color': 'data(color)', 'border-style': 'data(borderStyle)',
             'border-color': 'mapData(selectionStrength, 0, 1, #4d6170, #9fe4cf)',
-            'border-width': 2.5, 'overlay-opacity': 0
+            'border-width': 2.5 * nodeDisplayScale, 'overlay-opacity': 0
+          } },
+          { selector: 'node.physics-size', style: {
+            width: 'data(width)', height: 'data(height)', padding: 'data(padding)',
+            'font-size': 13, 'border-width': 2.5
           } },
           { selector: 'edge', style: {
             events: 'no', 'overlay-opacity': 0,
