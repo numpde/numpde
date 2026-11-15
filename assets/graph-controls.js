@@ -206,9 +206,24 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
     if (colorMode.colors) {
       const counts = new Map();
       for (const item of info.values()) { const value = item[colorSelect.value]; counts.set(value, (counts.get(value) ?? 0) + 1); }
+      const mode = colorSelect.value, muted = mutedCategories.get(mode);
+      const actions = document.createElement('div');
+      actions.className = 'filter-actions';
+      for (const [text, checked] of [['All', true], ['None', false]]) {
+        const button = document.createElement('button');
+        button.type = 'button'; button.textContent = text;
+        button.addEventListener('click', () => {
+          muted.clear();
+          if (!checked) for (const key of counts.keys()) muted.add(key);
+          legend.querySelectorAll('input.legend-toggle').forEach(input => { input.checked = checked; });
+          applyAppearance(false);
+          writeURL();
+        });
+        actions.append(button);
+      }
+      legend.append(actions);
       for (const [key, count] of counts) {
         const row = document.createElement('label'), swatch = document.createElement('input');
-        const mode = colorSelect.value, muted = mutedCategories.get(mode);
         row.className = 'legend-entry'; swatch.className = 'legend-swatch legend-toggle';
         swatch.type = 'checkbox'; swatch.name = 'legend-' + mode; swatch.value = key ?? '';
         swatch.checked = !muted.has(key);
