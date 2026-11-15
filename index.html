@@ -266,7 +266,7 @@
                 Math.max(0, Math.abs(dy) - a.halfHeight - b.halfHeight));
               // Repel nearby label boundaries before collision, fading out at 80px.
               const proximity = Math.max(0, 1 - gap / 80);
-              const force = (local ? 0 : 4000 / (distance * distance)) + 1.5 * proximity * proximity;
+              const force = (local ? 0 : 4000 / (distance * distance)) + 3 * proximity * proximity;
               const fx = dx / distance * force, fy = dy / distance * force;
               a.vx -= fx; a.vy -= fy;
               b.vx += fx; b.vy += fy;
