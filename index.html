@@ -101,6 +101,7 @@
       return embeddedMap.embedded.pair_indices.map(index => {
         const [source, target, distance] = embeddedMap.pairs[index];
         return {
+          selectable: false,
           data: {
             id: `neighbor:${source}:${target}`,
             source: embeddedMap.node_ids[source], target: embeddedMap.node_ids[target],
@@ -114,7 +115,7 @@
 
     function edgesForView(view) {
       if (view === 'embedded') return neighborhoodEdges();
-      return inventoryData.links.map(link => ({ data: {
+      return inventoryData.links.map(link => ({ selectable: false, data: {
         id: link.id, source: link.source, target: link.target,
         directed: inventoryData.link_types[link.type].directed,
         type: link.type, claims: [link, ...(link.additional_interpretations ?? [])]
@@ -570,6 +571,7 @@
           } },
           { selector: 'node.focused', style: { 'border-color': '#345e62', 'border-width': 2.5 } },
           { selector: 'edge', style: {
+            events: 'no', 'overlay-opacity': 0,
             width: 1.3, 'line-color': '#9baaa4', 'line-opacity': .65,
             'curve-style': 'bezier', 'target-arrow-shape': 'none',
             'target-arrow-color': '#82978d', 'arrow-scale': .7, label: ''
