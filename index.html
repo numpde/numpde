@@ -21,7 +21,6 @@
       display: grid; grid-template-columns: 1fr 1fr 1.15fr auto; align-items: end; gap: 8px;
       font: 12px system-ui, sans-serif; color: #263a3c; }
     #controls > label { display: grid; gap: 4px; min-width: 0; }
-    #controls > label > span { width: fit-content; padding: 0 4px; background: #f6f4ef; }
     #controls select, #controls summary { width: 100%; min-height: 40px; padding: 8px;
       border: 1px solid #bac6be; border-radius: 6px; color: inherit; background: #f6f4ef;
       font: inherit; cursor: pointer; }
@@ -64,8 +63,8 @@
 <body>
   <main id="graph" tabindex="0" aria-label="Projects" aria-busy="true"></main>
   <section id="controls" aria-label="Graph appearance and connections" inert>
-    <label><span>Color by</span><select id="color-by"></select></label>
-    <label><span>Size by</span><select id="size-by"></select></label>
+    <label><select id="color-by" aria-label="Color by"></select></label>
+    <label><select id="size-by" aria-label="Size by"></select></label>
     <details id="edge-filter"><summary id="edge-summary">Include edges</summary><div id="edge-options" class="control-panel"></div></details>
     <details id="appearance-legend"><summary>Legend</summary><div id="legend-content" class="control-panel"></div></details>
   </section>

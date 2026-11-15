@@ -30,7 +30,7 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
   const categoryColors = new Map(Object.keys(inventory.category_definitions).map((key, i) => [key, palette[i % palette.length]]));
   const contextColors = new Map(Object.keys(inventory.work_context_types).map((key, i) => [key, palette[i % palette.length]]));
   const colorModes = {
-    none: { label: 'Uniform' },
+    none: { label: 'Color by' },
     domain: { label: 'Primary domain', colors: categoryColors, labelFor: title },
     context: { label: 'Primary work context', colors: contextColors,
       labelFor: key => inventory.work_context_types[key].label },
@@ -40,7 +40,7 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
     connections: { label: 'Visible connections', log: true }
   };
   const sizeModes = {
-    none: { label: 'Uniform' },
+    none: { label: 'Size by' },
     commits: colorModes.commits,
     connections: colorModes.connections,
     repositories: { label: 'Repository count', log: true },
@@ -178,7 +178,7 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
   function renderLegend(colorMode, colorScale, sizeMode, sizeScale) {
     legend.replaceChildren();
     const heading = text => { const element = document.createElement('h3'); element.textContent = text; legend.append(element); };
-    heading('Color · ' + colorMode.label);
+    if (colorSelect.value !== 'none') heading('Color · ' + colorMode.label);
     if (colorMode.colors) {
       const counts = new Map();
       for (const item of info.values()) { const value = item[colorSelect.value]; counts.set(value, (counts.get(value) ?? 0) + 1); }
@@ -203,7 +203,7 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
       swatch.style.background = '#d8d8d8';
       row.append(swatch, document.createTextNode('Unknown')); legend.append(row);
     }
-    heading('Size · ' + sizeMode.label);
+    if (sizeSelect.value !== 'none') heading('Size · ' + sizeMode.label);
     if (sizeScale) {
       const range = document.createElement('div');
       range.textContent = `${sizeScale.min.toLocaleString()}–${sizeScale.max.toLocaleString()}`;
