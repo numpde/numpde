@@ -94,6 +94,7 @@
     let layoutSeed = new Map();
     let layoutAnchors = null;
     let liveNeighborhood = null;
+    let liveSourceId = null;
     let positionTargets = new Map();
     let draggedNode = null;
     let currentView = null;
@@ -176,6 +177,7 @@
       liveFrame = null;
       liveActive = false;
       liveNeighborhood = null;
+      liveSourceId = null;
       initialMotion = false;
     }
 
@@ -186,9 +188,12 @@
       if (source) {
         // Manual interaction takes over even if initial settling is ongoing.
         if (!layoutAnchors) layoutAnchors = new Map(cy.nodes().map(node => [node.id(), { ...node.position() }]));
-        let affected = source.collection();
-        for (let hop = 0; hop < 2; hop++) affected = affected.union(affected.connectedEdges().not('.filtered-out').connectedNodes());
-        liveNeighborhood = new Set(affected.map(node => node.id()));
+        if (liveSourceId !== source.id()) {
+          let affected = source.collection();
+          for (let hop = 0; hop < 2; hop++) affected = affected.union(affected.connectedEdges().not('.filtered-out').connectedNodes());
+          liveNeighborhood = new Set(affected.map(node => node.id()));
+          liveSourceId = source.id();
+        }
       }
       liveActive = true;
       if (document.hidden || liveFrame !== null) return;
@@ -231,8 +236,8 @@
         }
         const dragging = bodies.some(body => body.node.grabbed());
         const local = liveNeighborhood !== null;
-        // Force strengths stay constant. Interactive springs preserve the
-        // settled edge vectors instead of asking for another global layout.
+        // Local interaction permits rotation and repacking while distant nodes
+        // stay fixed, unless direct contact needs to make room around them.
         for (let iteration = 0; iteration < Math.ceil(stepsPerFrame * step); iteration++) {
           for (const body of bodies) {
             body.previousX = body.x;
@@ -241,24 +246,16 @@
           for (let i = 0; i < bodies.length; i++) {
             for (let j = i + 1; j < bodies.length; j++) {
               const a = bodies[i], b = bodies[j];
+              if (local && a.fixed && b.fixed) continue;
               let dx = b.x - a.x, dy = b.y - a.y;
-              if (local) {
-                const overlapX = a.halfWidth + b.halfWidth + 10 - Math.abs(dx);
-                const overlapY = a.halfHeight + b.halfHeight + 10 - Math.abs(dy);
-                if (overlapX > 0 && overlapY > 0) {
-                  if (overlapX < overlapY) {
-                    const force = (dx < 0 ? -1 : 1) * overlapX * .5;
-                    a.vx -= force; b.vx += force;
-                  } else {
-                    const force = (dy < 0 ? -1 : 1) * overlapY * .5;
-                    a.vy -= force; b.vy += force;
-                  }
-                }
-                continue;
-              }
               if (dx === 0 && dy === 0) { dx = 1; dy = 1; }
               const distance = Math.hypot(dx, dy);
-              const force = 4000 / (distance * distance);
+              const gap = Math.hypot(
+                Math.max(0, Math.abs(dx) - a.halfWidth - b.halfWidth),
+                Math.max(0, Math.abs(dy) - a.halfHeight - b.halfHeight));
+              // Repel nearby label boundaries before collision, fading out at 80px.
+              const proximity = Math.max(0, 1 - gap / 80);
+              const force = (local ? 0 : 4000 / (distance * distance)) + 1.5 * proximity * proximity;
               const fx = dx / distance * force, fy = dy / distance * force;
               a.vx -= fx; a.vy -= fy;
               b.vx += fx; b.vy += fy;
@@ -266,20 +263,18 @@
           }
           for (const { a, b, length, strength } of links) {
             let dx = b.x - a.x, dy = b.y - a.y;
-            if (local) {
-              const restA = layoutAnchors.get(a.node.id()), restB = layoutAnchors.get(b.node.id());
-              const fx = (dx - (restB.x - restA.x)) * .015;
-              const fy = (dy - (restB.y - restA.y)) * .015;
-              a.vx += fx; a.vy += fy; b.vx -= fx; b.vy -= fy;
-              continue;
-            }
             if (dx === 0 && dy === 0) { dx = 1; dy = 1; }
             const distance = Math.hypot(dx, dy);
             const ux = Math.abs(dx) / distance, uy = Math.abs(dy) / distance;
             // Measure the gap between rectangle boundaries along the edge.
             const clearance = Math.min(a.halfWidth / ux, a.halfHeight / uy)
               + Math.min(b.halfWidth / ux, b.halfHeight / uy);
-            const force = (distance - clearance - length) * strength;
+            let target = clearance + length;
+            if (local) {
+              const restA = layoutAnchors.get(a.node.id()), restB = layoutAnchors.get(b.node.id());
+              target = Math.max(target, Math.hypot(restB.x - restA.x, restB.y - restA.y));
+            }
+            const force = (distance - target) * strength;
             const fx = dx / distance * force, fy = dy / distance * force;
             a.vx += fx; a.vy += fy;
             b.vx -= fx; b.vy -= fy;
@@ -289,54 +284,69 @@
               body.vx = 0; body.vy = 0;
               continue;
             }
-            // Weak seed tethers remove unconstrained component drift while
-            // arranging; settled-position tethers keep later drags local.
+            // Preserve deliberate placements, but let ordinary neighbors reflow.
             const seed = layoutSeed.get(body.node.id());
             const anchor = positionTargets.get(body.node.id()) ?? layoutAnchors?.get(body.node.id());
-            const anchorX = anchor ? (anchor.x - body.x) * .15 : 0;
-            const anchorY = anchor ? (anchor.y - body.y) * .15 : 0;
+            const anchorStrength = positionTargets.has(body.node.id()) ? .15 : .008;
+            const anchorX = anchor ? (anchor.x - body.x) * anchorStrength : 0;
+            const anchorY = anchor ? (anchor.y - body.y) * anchorStrength : 0;
             body.vx = (body.vx + (local ? 0 : (seed.x - body.x) * .003) + anchorX) * .78;
             body.vy = (body.vy + (local ? 0 : (seed.y - body.y) * .003) + anchorY) * .78;
             const limit = Math.min(1, 1 / (Math.hypot(body.vx, body.vy) || 1));
-            const dx = body.vx * limit, dy = body.vy * limit;
-            body.x += dx; body.y += dy;
+            body.vx *= limit; body.vy *= limit;
           }
-          // Project onto nonoverlapping label boxes during integration, not
-          // after settling: a final position correction would store new stress.
-          for (let sweep = 0; !local && sweep < 3; sweep++) {
+          // Blend corrections into predicted velocities instead of snapping
+          // positions and erasing the motion needed to escape a crowded patch.
+          let overlap = 0;
+          for (let sweep = 0; sweep < 2; sweep++) {
             for (let i = 0; i < bodies.length; i++) {
               for (let j = i + 1; j < bodies.length; j++) {
                 const a = bodies[i], b = bodies[j];
-                const dx = b.x - a.x, dy = b.y - a.y;
-                const overlapX = a.halfWidth + b.halfWidth + 10 - Math.abs(dx);
-                const overlapY = a.halfHeight + b.halfHeight + 10 - Math.abs(dy);
+                if (a.fixed && b.fixed) continue;
+                const dx = b.x + b.vx - a.x - a.vx, dy = b.y + b.vy - a.y - a.vy;
+                const overlapX = a.halfWidth + b.halfWidth + 24 - Math.abs(dx);
+                const overlapY = a.halfHeight + b.halfHeight + 24 - Math.abs(dy);
                 if (overlapX <= 0 || overlapY <= 0) continue;
+                // Release a spatial neighbor only when pressure reaches its
+                // inner 8px margin; graph distance alone must not trap a node.
+                if (local && overlapX > 16 && overlapY > 16) {
+                  if (a.fixed && !a.node.locked() && !a.node.grabbed()) {
+                    liveNeighborhood.add(a.node.id()); a.fixed = false;
+                  }
+                  if (b.fixed && !b.node.locked() && !b.node.grabbed()) {
+                    liveNeighborhood.add(b.node.id()); b.fixed = false;
+                  }
+                }
                 const freeA = !a.fixed;
                 const freeB = !b.fixed;
                 const free = Number(freeA) + Number(freeB);
                 if (!free) continue;
+                overlap = Math.max(overlap, Math.min(overlapX, overlapY) - 24);
                 if (overlapX < overlapY) {
-                  const push = (dx < 0 ? -1 : 1) * overlapX / free;
-                  if (freeA) { a.x -= push; a.vx = 0; }
-                  if (freeB) { b.x += push; b.vx = 0; }
+                  const push = (dx < 0 ? -1 : 1) * overlapX * .7 / free;
+                  if (freeA) a.vx -= push;
+                  if (freeB) b.vx += push;
                 } else {
-                  const push = (dy < 0 ? -1 : 1) * overlapY / free;
-                  if (freeA) { a.y -= push; a.vy = 0; }
-                  if (freeB) { b.y += push; b.vy = 0; }
+                  const push = (dy < 0 ? -1 : 1) * overlapY * .7 / free;
+                  if (freeA) a.vy -= push;
+                  if (freeB) b.vy += push;
                 }
               }
             }
           }
+          for (const body of bodies) {
+            if (body.fixed) continue;
+            body.x += body.vx; body.y += body.vy;
+          }
           const movement = Math.max(...bodies.map(body => Math.hypot(body.x - body.previousX, body.y - body.previousY)));
-          quietSteps = !dragging && movement < .1 ? quietSteps + 1 : 0;
+          quietSteps = !dragging && movement < .1 && overlap < .5 ? quietSteps + 1 : 0;
         }
         cy.batch(() => bodies.forEach(body => {
           if (!body.fixed) body.node.position({ x: body.x, y: body.y });
         }));
         if (quietSteps >= 12) {
-          // Preserve the settled mental map during later local interactions.
-          // Only an explicit new arrangement replaces these weak tethers.
-          if (!layoutAnchors) layoutAnchors = new Map(bodies.map(body => [body.node.id(), { x: body.x, y: body.y }]));
+          // The relaxed positions become the reference for the next interaction.
+          layoutAnchors = new Map(bodies.map(body => [body.node.id(), { x: body.x, y: body.y }]));
           const refit = initialMotion;
           stopLiveLayout();
           if (refit) {
@@ -706,9 +716,9 @@
         if (edgesChanged) updateSelectionBorders();
         if (resize) separateBoxes();
         layoutSeed = new Map(cy.nodes().map(node => [node.id(), { ...node.position() }]));
-        layoutAnchors = edgesChanged ? null : new Map(layoutSeed);
+        layoutAnchors = edgesChanged || resize ? null : new Map(layoutSeed);
         positionTargets.clear();
-        if (edgesChanged) startLiveLayout();
+        if (edgesChanged || resize) startLiveLayout();
       } });
       document.querySelectorAll('#views a').forEach(link => link.addEventListener('click', event => {
         if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
