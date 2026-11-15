@@ -50,6 +50,16 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
     complexity: { label: 'Codebase complexity', max: 100 },
     difficulty: colorModes.difficulty
   };
+  const mutedCategories = new Map();
+  function restoreLegendSelections(current) {
+    for (const [mode, settings] of Object.entries(colorModes)) {
+      if (!settings.colors) continue;
+      const parameter = 'muted-' + mode;
+      mutedCategories.set(mode, current.has(parameter)
+        ? new Set(current.get(parameter).split(',').map(value => value || null)) : new Set());
+    }
+  }
+  restoreLegendSelections(parameters);
   function populate(select, modes, parameter) {
     for (const [value, mode] of Object.entries(modes)) select.add(new Option(mode.label, value));
     select.value = Object.hasOwn(modes, parameters.get(parameter)) ? parameters.get(parameter) : defaults[parameter];
@@ -121,6 +131,11 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
       if (select.value === defaults[key]) url.searchParams.delete(key);
       else url.searchParams.set(key, select.value);
     }
+    for (const [mode, muted] of mutedCategories) {
+      const parameter = 'muted-' + mode;
+      if (!muted.size) url.searchParams.delete(parameter);
+      else url.searchParams.set(parameter, [...muted].map(value => value ?? '').join(','));
+    }
     for (const group of groups) {
       const checked = group.inputs.filter(input => input.checked).map(input => input.value);
       if (checked.length === group.inputs.length) url.searchParams.delete(group.key);
@@ -158,7 +173,7 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
     const [low, high] = mode.gradient ?? [[237, 241, 237], [115, 183, 170]];
     return '#' + low.map((value, i) => Math.round(value + (high[i] - value) * ratio).toString(16).padStart(2, '0')).join('');
   }
-  function applyAppearance() {
+  function applyAppearance(render = true) {
     const colorMode = colorModes[colorSelect.value], sizeMode = sizeModes[sizeSelect.value];
     const colorScale = !colorMode.colors && colorSelect.value !== 'none' ? scale(colorMode, colorSelect.value) : null;
     const sizeScale = sizeSelect.value !== 'none' ? scale(sizeMode, sizeSelect.value) : null;
@@ -166,7 +181,11 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
       for (const node of cy.nodes()) {
         const item = info.get(node.id());
         let color = '#e9efeb';
-        if (colorMode.colors) color = colorMode.colors.get(item[colorSelect.value]) ?? '#d8d8d8';
+        if (colorMode.colors) {
+          const category = item[colorSelect.value];
+          color = mutedCategories.get(colorSelect.value).has(category)
+            ? '#e9efeb' : colorMode.colors.get(category) ?? '#d8d8d8';
+        }
         else if (colorScale) {
           const ratio = colorScale.ratio(item[colorSelect.value]);
           color = ratio === null ? '#d8d8d8' : gradient(ratio, colorMode);
@@ -178,7 +197,7 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
           borderStyle: sizeScale && ratio === null ? 'dashed' : 'solid' });
       }
     });
-    renderLegend(colorMode, colorScale, sizeMode, sizeScale);
+    if (render) renderLegend(colorMode, colorScale, sizeMode, sizeScale);
   }
   function renderLegend(colorMode, colorScale, sizeMode, sizeScale) {
     legend.replaceChildren();
@@ -188,9 +207,18 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
       const counts = new Map();
       for (const item of info.values()) { const value = item[colorSelect.value]; counts.set(value, (counts.get(value) ?? 0) + 1); }
       for (const [key, count] of counts) {
-        const row = document.createElement('div'), swatch = document.createElement('span');
-        row.className = 'legend-entry'; swatch.className = 'legend-swatch';
-        swatch.style.background = colorMode.colors.get(key) ?? '#d8d8d8';
+        const row = document.createElement('label'), swatch = document.createElement('input');
+        const mode = colorSelect.value, muted = mutedCategories.get(mode);
+        row.className = 'legend-entry'; swatch.className = 'legend-swatch legend-toggle';
+        swatch.type = 'checkbox'; swatch.name = 'legend-' + mode; swatch.value = key ?? '';
+        swatch.checked = !muted.has(key);
+        swatch.style.setProperty('--swatch-color', colorMode.colors.get(key) ?? '#d8d8d8');
+        swatch.addEventListener('change', () => {
+          if (swatch.checked) muted.delete(key);
+          else muted.add(key);
+          applyAppearance(false);
+          writeURL();
+        });
         row.append(swatch, document.createTextNode(`${key === null ? 'Unknown' : colorMode.labelFor(key)} · ${count}`));
         legend.append(row);
       }
@@ -259,6 +287,7 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
       embedded = nextEmbedded;
       if (restoreAppearance) {
         const current = new URLSearchParams(location.search);
+        restoreLegendSelections(current);
         colorSelect.value = Object.hasOwn(colorModes, current.get('color')) ? current.get('color') : defaults.color;
         sizeSelect.value = Object.hasOwn(sizeModes, current.get('size')) ? current.get('size') : defaults.size;
       }

@@ -41,6 +41,14 @@
       color: inherit; border: 1px solid #bac6be; border-radius: 4px; cursor: pointer; }
     .legend-entry { display: flex; align-items: center; gap: 8px; min-height: 26px; }
     .legend-swatch { width: 16px; height: 16px; border: 1px solid #8a9e96; border-radius: 3px; flex: 0 0 auto; }
+    .control-panel input.legend-toggle { appearance: none; margin: 0; cursor: pointer;
+      display: grid; place-content: center; background: #e9efeb; }
+    .control-panel input.legend-toggle:checked { background: var(--swatch-color); }
+    .legend-toggle::after { content: ''; width: 8px; height: 5px;
+      border-left: 2px solid #263a3c; border-bottom: 2px solid #263a3c;
+      transform: translateY(-1px) rotate(-45deg); opacity: 0; }
+    .legend-toggle:checked::after { opacity: 1; }
+    .legend-toggle:focus-visible { outline: 2px solid #345e62; outline-offset: 2px; }
     .legend-gradient { height: 12px; border-radius: 3px; background: linear-gradient(to right, #edf1ed, #73b7aa); }
     .legend-range { display: flex; justify-content: space-between; gap: 12px; margin-top: 5px; }
     #node-info { position: fixed; width: min(320px, calc(100vw - 24px)); max-height: 40vh;
