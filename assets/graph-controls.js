@@ -1,0 +1,263 @@
+/* Presentation derives from the project inventory; no metadata is written back. */
+function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
+  const controls = document.getElementById('controls');
+  const colorSelect = document.getElementById('color-by');
+  const sizeSelect = document.getElementById('size-by');
+  const edgeOptions = document.getElementById('edge-options');
+  const legend = document.getElementById('legend-content');
+  const parameters = new URLSearchParams(location.search);
+  const repositories = new Map(inventory.repositories.map(repo => [repo.id, repo]));
+  const info = new Map(inventory.projects.map(project => {
+    const members = project.repository_ids.map(id => repositories.get(id));
+    const representative = members[0];
+    const difficulty = project.contribution_difficulty ?? representative.assessments.difficulty;
+    return [project.id, {
+      domain: representative.categories[0] ?? null,
+      context: representative.work_contexts[0] ?? null,
+      visibility: members.some(repo => repo.visibility === 'private') ? 'private' : 'public',
+      commits: project.user_work.commit_count,
+      activity: project.user_work.last_activity_date ? Date.parse(project.user_work.last_activity_date + 'T00:00:00Z') : null,
+      repositories: members.length,
+      complexity: representative.assessments.repository_complexity.score,
+      difficulty: difficulty?.score ?? null,
+      connections: 0
+    }];
+  }));
+  const title = text => text.replace(/[-_]/g, ' ').replace(/^./, letter => letter.toUpperCase());
+  const palette = ['#c5ded7', '#d0d5ed', '#ead5b8', '#e5c9d1', '#cbdcb8', '#c4d8ec', '#dfcfe8',
+    '#e7dfb5', '#c4e0df', '#e8caba', '#d5dbcb', '#cbd0e1', '#dce4c3', '#dbccba', '#c6dbe2',
+    '#e6cddf', '#d4dfd7', '#ded7eb', '#d2ddbd', '#ead9cd', '#d6d6d6'];
+  const categoryColors = new Map(Object.keys(inventory.category_definitions).map((key, i) => [key, palette[i % palette.length]]));
+  const contextColors = new Map(Object.keys(inventory.work_context_types).map((key, i) => [key, palette[i % palette.length]]));
+  const colorModes = {
+    none: { label: 'Uniform' },
+    domain: { label: 'Primary domain', colors: categoryColors, labelFor: title,
+      note: 'Uses the first listed domain of the project’s representative repository. Other domains remain in the inventory.' },
+    context: { label: 'Primary work context', colors: contextColors,
+      labelFor: key => inventory.work_context_types[key].label,
+      note: 'Uses the first listed work context of the representative repository.' },
+    visibility: { label: 'Visibility', colors: new Map([['public', '#d3e3d2'], ['private', '#e6cdbd']]), labelFor: title,
+      note: 'A project is private here if any of its repository records is private.' },
+    commits: { label: 'Personal commits', log: true, note: 'Unique attributable commit SHAs, including inferred identities. Log scale; this measures activity, not effort.' },
+    activity: { label: 'Last personal activity', date: true, note: 'Last observed personal activity, not the latest upstream commit. Earlier → more recent.' },
+    connections: { label: 'Visible connections', log: true, note: 'Distinct neighbors through currently included edges. Parallel relationship types count once.' }
+  };
+  const sizeModes = {
+    none: { label: 'Uniform' },
+    commits: colorModes.commits,
+    connections: colorModes.connections,
+    repositories: { label: 'Repository count', log: true, note: 'Number of repository records grouped into the project; not a measure of work.' },
+    complexity: { label: 'Codebase complexity (estimate)', max: 100,
+      note: 'Whole-codebase complexity of the representative repository, including upstream work. Scale: 0–100.' },
+    difficulty: { label: 'Contribution difficulty (estimate)', max: 100,
+      note: 'Estimated difficulty of your contribution. Unassessed projects stay unknown; merged repository estimates are not combined.' }
+  };
+  function populate(select, modes, parameter) {
+    for (const [value, mode] of Object.entries(modes)) select.add(new Option(mode.label, value));
+    select.value = Object.hasOwn(modes, parameters.get(parameter)) ? parameters.get(parameter) : 'none';
+  }
+  populate(colorSelect, colorModes, 'color');
+  populate(sizeSelect, sizeModes, 'size');
+
+  const groups = [];
+  function checklist(key, heading, choices, { actions = false, note = '' } = {}) {
+    const fieldset = document.createElement('fieldset');
+    const headingElement = document.createElement('legend');
+    headingElement.textContent = heading;
+    fieldset.append(headingElement);
+    const current = new URLSearchParams(location.search);
+    const selected = current.has(key) ? new Set(current.get(key).split(',')) : new Set(choices.map(choice => choice.value));
+    const group = { key, fieldset, inputs: [] };
+    if (actions) {
+      const buttons = document.createElement('div');
+      buttons.className = 'filter-actions';
+      for (const [label, checked] of [['All', true], ['None', false]]) {
+        const button = document.createElement('button');
+        button.type = 'button'; button.textContent = label;
+        button.setAttribute('aria-label', label + ' ' + heading.toLowerCase());
+        button.addEventListener('click', () => {
+          group.inputs.forEach(input => { input.checked = checked; });
+          filterEdges();
+        });
+        buttons.append(button);
+      }
+      fieldset.append(buttons);
+    }
+    for (const choice of choices) {
+      const label = document.createElement('label');
+      if (choice.description) label.title = choice.description;
+      const input = document.createElement('input');
+      input.type = 'checkbox'; input.name = key; input.value = choice.value;
+      input.checked = selected.has(choice.value);
+      input.addEventListener('change', () => filterEdges());
+      label.append(input, document.createTextNode(choice.label));
+      fieldset.append(label); group.inputs.push(input);
+    }
+    if (note) { const paragraph = document.createElement('p'); paragraph.textContent = note; fieldset.append(paragraph); }
+    edgeOptions.append(fieldset); groups.push(group);
+    return () => new Set(group.inputs.filter(input => input.checked).map(input => input.value));
+  }
+  let selectedRules, selectedTypes, selectedBases, selectedConfidence;
+  function buildEdgeOptions() {
+  groups.length = 0;
+  edgeOptions.replaceChildren();
+  if (embedded) {
+    selectedRules = checklist('rules', 'Include either selection rule', [
+      { value: 'cutoff', label: 'Within the 2% distance cutoff' },
+      { value: 'nearest', label: 'Each project’s two nearest neighbors' }
+    ], { note: 'The union of the selected rules is shown. An edge can satisfy both rules. All project nodes stay visible.' });
+  } else {
+    selectedTypes = checklist('types', 'Relationship types', Object.entries(inventory.link_types).map(([value, type]) => ({
+      value, label: type.label, description: type.description
+    })), { actions: true });
+    selectedBases = checklist('basis', 'Evidence basis', [
+      { value: 'established', label: 'Established' },
+      { value: 'interpretive', label: 'Interpretive' },
+      { value: 'prospective', label: 'Prospective' }
+    ], { note: 'A proposed transfer or integration stays prospective, even at high confidence.' });
+    selectedConfidence = checklist('confidence', 'Confidence', ['high', 'medium', 'low'].map(value => ({ value, label: title(value) })),
+      { note: 'A relationship is included if a supporting interpretation matches both the selected basis and confidence.' });
+  }
+  }
+
+  function writeURL() {
+    const url = new URL(location.href);
+    for (const [key, select] of [['color', colorSelect], ['size', sizeSelect]]) {
+      if (select.value === 'none') url.searchParams.delete(key);
+      else url.searchParams.set(key, select.value);
+    }
+    for (const group of groups) {
+      const checked = group.inputs.filter(input => input.checked).map(input => input.value);
+      if (checked.length === group.inputs.length) url.searchParams.delete(group.key);
+      else url.searchParams.set(group.key, checked.join(','));
+    }
+    history.replaceState(null, '', url);
+    for (const link of document.querySelectorAll('#views a')) {
+      const target = new URL(url);
+      target.searchParams.set('view', link.dataset.view);
+      link.href = target.pathname + target.search;
+    }
+  }
+  function updateConnections() {
+    const neighbors = new Map(cy.nodes().map(node => [node.id(), new Set()]));
+    for (const edge of cy.edges().not('.filtered-out')) {
+      neighbors.get(edge.source().id()).add(edge.target().id());
+      neighbors.get(edge.target().id()).add(edge.source().id());
+    }
+    for (const [id, peers] of neighbors) info.get(id).connections = peers.size;
+  }
+  const known = value => typeof value === 'number' && Number.isFinite(value);
+  function scale(mode, key) {
+    const values = [...info.values()].map(item => item[key]).filter(known);
+    const min = mode.date && values.length ? Math.min(...values) : 0;
+    const max = mode.max ?? Math.max(0, ...values);
+    return { min, max, knownCount: values.length, ratio(value) {
+      if (!known(value)) return null;
+      if (max === min) return 0;
+      return Math.max(0, Math.min(1, mode.log ? Math.log1p(value) / Math.log1p(max) : (value - min) / (max - min)));
+    } };
+  }
+  function gradient(ratio) {
+    const low = [237, 241, 237], high = [115, 183, 170];
+    return '#' + low.map((value, i) => Math.round(value + (high[i] - value) * ratio).toString(16).padStart(2, '0')).join('');
+  }
+  function applyAppearance() {
+    const colorMode = colorModes[colorSelect.value], sizeMode = sizeModes[sizeSelect.value];
+    const colorScale = !colorMode.colors && colorSelect.value !== 'none' ? scale(colorMode, colorSelect.value) : null;
+    const sizeScale = sizeSelect.value !== 'none' ? scale(sizeMode, sizeSelect.value) : null;
+    cy.batch(() => {
+      for (const node of cy.nodes()) {
+        const item = info.get(node.id());
+        let color = '#e9efeb';
+        if (colorMode.colors) color = colorMode.colors.get(item[colorSelect.value]) ?? '#d8d8d8';
+        else if (colorScale) {
+          const ratio = colorScale.ratio(item[colorSelect.value]);
+          color = ratio === null ? '#d8d8d8' : gradient(ratio);
+        }
+        const ratio = sizeScale ? sizeScale.ratio(item[sizeSelect.value]) : 0;
+        const size = ratio ?? 0;
+        node.data({ color, width: node.data('labelWidth') + 12 * size,
+          height: 16 + 16 * size, padding: sizeScale ? 6 + 8 * size : 9,
+          borderStyle: sizeScale && ratio === null ? 'dashed' : 'solid' });
+      }
+    });
+    renderLegend(colorMode, colorScale, sizeMode, sizeScale);
+  }
+  function renderLegend(colorMode, colorScale, sizeMode, sizeScale) {
+    legend.replaceChildren();
+    const heading = text => { const element = document.createElement('h3'); element.textContent = text; legend.append(element); };
+    const note = text => { const element = document.createElement('p'); element.textContent = text; legend.append(element); };
+    heading('Color · ' + colorMode.label);
+    if (colorMode.colors) {
+      const counts = new Map();
+      for (const item of info.values()) { const value = item[colorSelect.value]; counts.set(value, (counts.get(value) ?? 0) + 1); }
+      for (const [key, count] of counts) {
+        const row = document.createElement('div'), swatch = document.createElement('span');
+        row.className = 'legend-entry'; swatch.className = 'legend-swatch';
+        swatch.style.background = colorMode.colors.get(key) ?? '#d8d8d8';
+        row.append(swatch, document.createTextNode(`${key === null ? 'Unknown' : colorMode.labelFor(key)} · ${count}`));
+        legend.append(row);
+      }
+    } else if (colorScale && colorScale.knownCount) {
+      const bar = document.createElement('div'), range = document.createElement('div');
+      bar.className = 'legend-gradient'; range.className = 'legend-range';
+      for (const value of [colorScale.min, colorScale.max]) {
+        const text = document.createElement('span'); text.textContent = colorMode.date ? new Date(value).toISOString().slice(0, 10) : value.toLocaleString(); range.append(text);
+      }
+      legend.append(bar, range);
+      if ([...info.values()].some(item => !known(item[colorSelect.value]))) note('Unknown values are gray.');
+    } else if (colorScale) note('No known values. Unknown values are gray.');
+    if (colorMode.note) note(colorMode.note);
+    heading('Size · ' + sizeMode.label);
+    if (sizeScale) {
+      note(`Range: ${sizeScale.min.toLocaleString()}–${sizeScale.max.toLocaleString()}. ${sizeMode.note}`);
+      if ([...info.values()].some(item => !known(item[sizeSelect.value]))) note('Unknown values use a small node with a dashed outline; known zero values have a solid outline.');
+    } else note('All labels use the same font size.');
+    if (colorSelect.value === 'none' && sizeSelect.value === 'none') note('Choose a color or size attribute to compare projects.');
+  }
+  function filterEdges(initial = false) {
+    const rules = embedded ? selectedRules() : null;
+    const types = embedded ? null : selectedTypes(), bases = embedded ? null : selectedBases(), confidence = embedded ? null : selectedConfidence();
+    cy.batch(() => {
+      for (const edge of cy.edges()) {
+        const include = embedded
+          ? (rules.has('cutoff') && edge.data('withinCutoff')) || (rules.has('nearest') && edge.data('nearest'))
+          : types.has(edge.data('type')) && edge.data('claims').some(claim => bases.has(claim.basis) && confidence.has(claim.confidence));
+        edge.toggleClass('filtered-out', !include);
+      }
+    });
+    updateConnections();
+    applyAppearance();
+    document.getElementById('edge-summary').textContent = `Include edges · ${cy.edges().not('.filtered-out').length}/${cy.edges().length}`;
+    writeURL();
+    if (!initial) onGraphChange({ resize: sizeSelect.value === 'connections' });
+  }
+  colorSelect.addEventListener('change', () => { applyAppearance(); writeURL(); });
+  sizeSelect.addEventListener('change', () => { applyAppearance(); onGraphChange({ resize: true }); writeURL(); });
+  for (const details of controls.querySelectorAll('details')) details.addEventListener('toggle', () => {
+    if (details.open) for (const other of controls.querySelectorAll('details')) if (other !== details) other.open = false;
+  });
+  document.addEventListener('pointerdown', event => {
+    if (!controls.contains(event.target)) controls.querySelectorAll('details[open]').forEach(details => { details.open = false; });
+  });
+  controls.addEventListener('keydown', event => {
+    if (event.key !== 'Escape') return;
+    const open = controls.querySelector('details[open]');
+    if (open) { open.open = false; open.querySelector('summary').focus(); event.preventDefault(); }
+  });
+  buildEdgeOptions();
+  filterEdges(true);
+  return {
+    setView(nextEmbedded, restoreAppearance = false) {
+      embedded = nextEmbedded;
+      if (restoreAppearance) {
+        const current = new URLSearchParams(location.search);
+        colorSelect.value = Object.hasOwn(colorModes, current.get('color')) ? current.get('color') : 'none';
+        sizeSelect.value = Object.hasOwn(sizeModes, current.get('size')) ? current.get('size') : 'none';
+      }
+      controls.querySelectorAll('details').forEach(details => { details.open = false; });
+      buildEdgeOptions();
+      filterEdges(true);
+    }
+  };
+}

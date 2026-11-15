@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Projects</title>
+  <style>
+    :root { color-scheme: light; background: #f6f4ef; }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    #graph { position: fixed; inset: 0; touch-action: none; outline: none; }
+    #graph[aria-busy="true"] { visibility: hidden; }
+    #graph:focus-visible { box-shadow: inset 0 0 0 2px #586d73; }
+    #views { position: fixed; top: 12px; right: 12px; display: flex; gap: 4px; }
+    #views a { display: grid; place-items: center; width: 44px; height: 44px;
+      color: #586d73; background: #f6f4ef; border: 1px solid #bac6be; border-radius: 6px; }
+    #views a[aria-current="page"] { color: #263a3c; background: #dce7df; border-color: #586d73; }
+    #views a:focus-visible { outline: 2px solid #345e62; outline-offset: 2px; }
+    #views svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+    #controls { position: fixed; top: 12px; left: 12px; width: min(650px, calc(100% - 120px));
+      display: grid; grid-template-columns: 1fr 1fr 1.15fr auto; align-items: end; gap: 8px;
+      font: 12px system-ui, sans-serif; color: #263a3c; }
+    #controls > label { display: grid; gap: 4px; min-width: 0; }
+    #controls > label > span { width: fit-content; padding: 0 4px; background: #f6f4ef; }
+    #controls select, #controls summary { width: 100%; min-height: 40px; padding: 8px;
+      border: 1px solid #bac6be; border-radius: 6px; color: inherit; background: #f6f4ef;
+      font: inherit; cursor: pointer; }
+    #controls select:focus-visible, #controls summary:focus-visible,
+    #controls button:focus-visible { outline: 2px solid #345e62; outline-offset: 2px; }
+    #controls details { min-width: 0; }
+    #controls details[open] > summary { background: #dce7df; border-color: #586d73; }
+    .control-panel { position: absolute; top: calc(100% + 8px); left: 0; width: min(360px, calc(100vw - 24px));
+      max-height: min(65vh, 520px); overflow: auto; overscroll-behavior: contain; padding: 14px;
+      background: #f6f4ef; border: 1px solid #bac6be; border-radius: 8px; box-shadow: 0 6px 20px #263a3c1f; }
+    .control-panel fieldset { border: 0; padding: 0; margin: 0 0 14px; }
+    .control-panel legend { font-weight: 600; margin-bottom: 6px; }
+    .control-panel label { display: flex; align-items: center; gap: 8px; min-height: 32px; cursor: pointer; }
+    .control-panel input { accent-color: #345e62; width: 16px; height: 16px; flex: 0 0 auto; }
+    .control-panel p { line-height: 1.5; margin: 6px 0 12px; color: #526663; }
+    .control-panel h3 { font-size: 12px; margin: 0 0 8px; }
+    .filter-actions { display: flex; gap: 8px; margin-bottom: 8px; }
+    .filter-actions button { font: inherit; padding: 4px 10px; background: transparent;
+      color: inherit; border: 1px solid #bac6be; border-radius: 4px; cursor: pointer; }
+    .legend-entry { display: flex; align-items: center; gap: 8px; min-height: 26px; }
+    .legend-swatch { width: 16px; height: 16px; border: 1px solid #8a9e96; border-radius: 3px; flex: 0 0 auto; }
+    .legend-gradient { height: 12px; border-radius: 3px; background: linear-gradient(to right, #edf1ed, #73b7aa); }
+    .legend-range { display: flex; justify-content: space-between; gap: 12px; margin-top: 5px; }
+    #node-info { position: fixed; width: min(320px, calc(100vw - 24px)); max-height: 40vh;
+      overflow: auto; padding: 14px; border: 1px solid #9aada5; border-radius: 10px;
+      background: #f6f4ef; color: #263a3c; box-shadow: 0 5px 20px #263a3c26;
+      font: 12px/1.5 system-ui, sans-serif; }
+    #node-info p { margin: 8px 0; }
+    #node-info a { color: #345e62; overflow-wrap: anywhere; }
+    #node-info strong { padding-right: 24px; display: block; }
+    #node-info button { position: absolute; right: 8px; top: 6px; border: 0;
+      background: none; color: inherit; font-size: 20px; cursor: pointer; }
+    @media (max-width: 650px) {
+      #controls { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px; }
+      #controls select, #controls summary { min-height: 44px; }
+    }
+  </style>
+  <script src="assets/vendor/cytoscape-3.34.4.min.js"></script>
+  <script src="assets/graph-controls.js"></script>
+</head>
+<body>
+  <main id="graph" tabindex="0" aria-label="Projects" aria-busy="true"></main>
+  <section id="controls" aria-label="Graph appearance and connections" inert>
+    <label><span>Color by</span><select id="color-by"></select></label>
+    <label><span>Size by</span><select id="size-by"></select></label>
+    <details id="edge-filter"><summary id="edge-summary">Include edges</summary><div id="edge-options" class="control-panel"></div></details>
+    <details id="appearance-legend"><summary>Legend</summary><div id="legend-content" class="control-panel"></div></details>
+  </section>
+  <nav id="views" aria-label="Graph view" inert>
+    <a href="?view=curated" data-view="curated" aria-label="Curated" title="Curated">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16-1 5 5-1L21 7l-4-4Z M14 6l4 4" /></svg>
+    </a>
+    <a href="?view=embedded" data-view="embedded" aria-label="Embedded" title="Embedded">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 6 14 1M5 6l6 13M19 7l-8 12" /><circle cx="5" cy="6" r="3" /><circle cx="19" cy="7" r="3" /><circle cx="11" cy="19" r="3" /></svg>
+    </a>
+  </nav>
+  <aside id="node-info" role="dialog" aria-labelledby="node-info-name" hidden></aside>
+  <script>
+    const graph = document.getElementById('graph');
+    let cy = null;
+    let arrangement = null;
+    let selected = null;
+    let liveFrame = null;
+    let liveActive = false;
+    let initialMotion = false;
+    let neighborhoodMap = null;
+    let layoutSeed = new Map();
+    let layoutAnchors = null;
+    let liveNeighborhood = null;
+    let positionTargets = new Map();
+    let draggedNode = null;
+    let currentView = null;
+    let graphControls = null;
+    let inventoryData = null;
+    let embeddedMap = null;
+
+    function neighborhoodEdges() {
+      const nearest = new Set(embeddedMap.embedded.nearest_pair_indices);
+      return embeddedMap.embedded.pair_indices.map(index => {
+        const [source, target, distance] = embeddedMap.pairs[index];
+        return {
+          data: {
+            id: `neighbor:${source}:${target}`,
+            source: embeddedMap.node_ids[source], target: embeddedMap.node_ids[target],
+            directed: false, distance, length: 45 + distance * 150,
+            withinCutoff: index < embeddedMap.embedded.cutoff_edge_count,
+            nearest: nearest.has(index)
+          }
+        };
+      });
+    }
+
+    function edgesForView(view) {
+      if (view === 'embedded') return neighborhoodEdges();
+      return inventoryData.links.map(link => ({ data: {
+        id: link.id, source: link.source, target: link.target,
+        directed: inventoryData.link_types[link.type].directed,
+        type: link.type, claims: [link, ...(link.additional_interpretations ?? [])]
+      } }));
+    }
+
+    function switchView(view, fromHistory = false) {
+      if (view !== 'curated' && view !== 'embedded') throw new Error('Choose view=curated or view=embedded.');
+      if (view === currentView && !fromHistory) return;
+      stopLiveLayout();
+      if (arrangement) {
+        cancelAnimationFrame(arrangement.frame);
+        cy.off('render', arrangement.reveal);
+        arrangement = null;
+        graph.setAttribute('aria-busy', 'false');
+        document.getElementById('controls').inert = false;
+        document.getElementById('views').inert = false;
+        cy.autoungrabify(false);
+        cy.userPanningEnabled(true);
+        cy.userZoomingEnabled(true);
+      }
+      currentView = view;
+      neighborhoodMap = view === 'embedded' ? embeddedMap : null;
+      if (!fromHistory) {
+        const url = new URL(location.href);
+        url.searchParams.set('view', view);
+        history.pushState(null, '', url);
+      }
+      document.querySelectorAll('#views a').forEach(link => {
+        if (link.dataset.view === view) link.setAttribute('aria-current', 'page');
+        else link.removeAttribute('aria-current');
+      });
+      cy.batch(() => { cy.edges().remove(); cy.add(edgesForView(view)); });
+      graphControls.setView(view === 'embedded', fromHistory);
+      graph.setAttribute('aria-description', view === 'embedded'
+        ? 'Embedded: the 2% distance cutoff plus each project’s two closest neighbors.'
+        : 'Curated project relationships.');
+      // Keep the current node positions and camera while the new edges settle.
+      layoutAnchors = null;
+      positionTargets.clear();
+      layoutSeed = new Map(cy.nodes().map(node => [node.id(), { ...node.position() }]));
+      startLiveLayout();
+    }
+
+    // Once the user takes control, initial settling must not refit their camera.
+    for (const event of ['pointerdown', 'wheel', 'keydown']) {
+      graph.addEventListener(event, () => { initialMotion = false; }, { passive: true });
+    }
+
+    function stopLiveLayout() {
+      if (liveFrame !== null) cancelAnimationFrame(liveFrame);
+      liveFrame = null;
+      liveActive = false;
+      liveNeighborhood = null;
+      initialMotion = false;
+    }
+
+    // Adapted from best-practices.html: Cytoscape owns a grabbed node, while
+    // springs and box-aware repulsion move its neighbors without moving the camera.
+    function startLiveLayout(source = null) {
+      if (!cy || arrangement) return;
+      if (source) {
+        // Manual interaction takes over even if initial settling is ongoing.
+        if (!layoutAnchors) layoutAnchors = new Map(cy.nodes().map(node => [node.id(), { ...node.position() }]));
+        let affected = source.collection();
+        for (let hop = 0; hop < 2; hop++) affected = affected.union(affected.connectedEdges().not('.filtered-out').connectedNodes());
+        liveNeighborhood = new Set(affected.map(node => node.id()));
+      }
+      liveActive = true;
+      if (document.hidden || liveFrame !== null) return;
+      const stepsPerFrame = matchMedia('(prefers-reduced-motion: reduce)').matches ? 24 : 12;
+      const bodies = cy.nodes(':visible').map(node => {
+        const bounds = node.boundingBox({ includeOverlays: false });
+        return {
+          node, radius: Math.hypot(bounds.w, bounds.h) / 2,
+          halfWidth: bounds.w / 2, halfHeight: bounds.h / 2,
+          x: 0, y: 0, vx: 0, vy: 0, previousX: 0, previousY: 0
+        };
+      });
+      const byId = new Map(bodies.map(body => [body.node.id(), body]));
+      const links = cy.edges().not('.filtered-out').map(edge =>
+        [byId.get(edge.source().id()), byId.get(edge.target().id()), edge.data('length') ?? 100]);
+      let previousTime = null;
+      let quietSteps = 0;
+      const tick = time => {
+        const step = previousTime === null ? 1 : Math.min(2, (time - previousTime) / 16.67);
+        previousTime = time;
+        for (const body of bodies) {
+          const position = body.node.position();
+          body.x = position.x;
+          body.y = position.y;
+          body.fixed = body.node.grabbed() || body.node.locked()
+            || (liveNeighborhood !== null && !liveNeighborhood.has(body.node.id()));
+        }
+        const dragging = bodies.some(body => body.node.grabbed());
+        const local = liveNeighborhood !== null;
+        // Force strengths stay constant. Interactive springs preserve the
+        // settled edge vectors instead of asking for another global layout.
+        for (let iteration = 0; iteration < Math.ceil(stepsPerFrame * step); iteration++) {
+          for (const body of bodies) {
+            body.previousX = body.x;
+            body.previousY = body.y;
+          }
+          for (let i = 0; i < bodies.length; i++) {
+            for (let j = i + 1; j < bodies.length; j++) {
+              const a = bodies[i], b = bodies[j];
+              let dx = b.x - a.x, dy = b.y - a.y;
+              if (local) {
+                const overlapX = a.halfWidth + b.halfWidth + 10 - Math.abs(dx);
+                const overlapY = a.halfHeight + b.halfHeight + 10 - Math.abs(dy);
+                if (overlapX > 0 && overlapY > 0) {
+                  if (overlapX < overlapY) {
+                    const force = (dx < 0 ? -1 : 1) * overlapX * .5;
+                    a.vx -= force; b.vx += force;
+                  } else {
+                    const force = (dy < 0 ? -1 : 1) * overlapY * .5;
+                    a.vy -= force; b.vy += force;
+                  }
+                }
+                continue;
+              }
+              if (dx === 0 && dy === 0) { dx = 1; dy = 1; }
+              const distance = Math.hypot(dx, dy);
+              const clearance = a.radius + b.radius + 30;
+              const force = (4000 / (distance * distance)
+                + Math.max(0, clearance - distance) * .12);
+              const fx = dx / distance * force, fy = dy / distance * force;
+              a.vx -= fx; a.vy -= fy;
+              b.vx += fx; b.vy += fy;
+            }
+          }
+          for (const [a, b, length] of links) {
+            const dx = b.x - a.x, dy = b.y - a.y;
+            if (local) {
+              const restA = layoutAnchors.get(a.node.id()), restB = layoutAnchors.get(b.node.id());
+              const fx = (dx - (restB.x - restA.x)) * .015;
+              const fy = (dy - (restB.y - restA.y)) * .015;
+              a.vx += fx; a.vy += fy; b.vx -= fx; b.vy -= fy;
+              continue;
+            }
+            const distance = Math.hypot(dx, dy) || 1;
+            const force = (distance - a.radius - b.radius - length) * .015;
+            const fx = dx / distance * force, fy = dy / distance * force;
+            a.vx += fx; a.vy += fy;
+            b.vx -= fx; b.vy -= fy;
+          }
+          for (const body of bodies) {
+            if (body.fixed) {
+              body.vx = 0; body.vy = 0;
+              continue;
+            }
+            // Weak seed tethers remove unconstrained component drift while
+            // arranging; settled-position tethers keep later drags local.
+            const seed = layoutSeed.get(body.node.id());
+            const anchor = positionTargets.get(body.node.id()) ?? layoutAnchors?.get(body.node.id());
+            const anchorX = anchor ? (anchor.x - body.x) * .15 : 0;
+            const anchorY = anchor ? (anchor.y - body.y) * .15 : 0;
+            body.vx = (body.vx + (local ? 0 : (seed.x - body.x) * .003) + anchorX) * .78;
+            body.vy = (body.vy + (local ? 0 : (seed.y - body.y) * .003) + anchorY) * .78;
+            const limit = Math.min(1, 1 / (Math.hypot(body.vx, body.vy) || 1));
+            const dx = body.vx * limit, dy = body.vy * limit;
+            body.x += dx; body.y += dy;
+          }
+          // Project onto nonoverlapping label boxes during integration, not
+          // after settling: a final position correction would store new stress.
+          for (let sweep = 0; !local && sweep < 3; sweep++) {
+            for (let i = 0; i < bodies.length; i++) {
+              for (let j = i + 1; j < bodies.length; j++) {
+                const a = bodies[i], b = bodies[j];
+                const dx = b.x - a.x, dy = b.y - a.y;
+                const overlapX = a.halfWidth + b.halfWidth + 10 - Math.abs(dx);
+                const overlapY = a.halfHeight + b.halfHeight + 10 - Math.abs(dy);
+                if (overlapX <= 0 || overlapY <= 0) continue;
+                const freeA = !a.fixed;
+                const freeB = !b.fixed;
+                const free = Number(freeA) + Number(freeB);
+                if (!free) continue;
+                if (overlapX < overlapY) {
+                  const push = (dx < 0 ? -1 : 1) * overlapX / free;
+                  if (freeA) { a.x -= push; a.vx = 0; }
+                  if (freeB) { b.x += push; b.vx = 0; }
+                } else {
+                  const push = (dy < 0 ? -1 : 1) * overlapY / free;
+                  if (freeA) { a.y -= push; a.vy = 0; }
+                  if (freeB) { b.y += push; b.vy = 0; }
+                }
+              }
+            }
+          }
+          const movement = Math.max(...bodies.map(body => Math.hypot(body.x - body.previousX, body.y - body.previousY)));
+          quietSteps = !dragging && movement < .1 ? quietSteps + 1 : 0;
+        }
+        cy.batch(() => bodies.forEach(body => {
+          if (!body.fixed) body.node.position({ x: body.x, y: body.y });
+        }));
+        if (quietSteps >= 12) {
+          // Preserve the settled mental map during later local interactions.
+          // Only an explicit new arrangement replaces these weak tethers.
+          if (!layoutAnchors) layoutAnchors = new Map(bodies.map(body => [body.node.id(), { x: body.x, y: body.y }]));
+          const refit = initialMotion;
+          stopLiveLayout();
+          if (refit) {
+            fitView();
+          }
+          return;
+        }
+        liveFrame = requestAnimationFrame(tick);
+      };
+      liveFrame = requestAnimationFrame(tick);
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        if (liveFrame !== null) cancelAnimationFrame(liveFrame);
+        liveFrame = null;
+      } else if (liveActive) startLiveLayout();
+    });
+
+    function fitView() {
+      const padding = innerWidth < 600 ? 24 : 48;
+      const top = Math.max(document.getElementById('controls').getBoundingClientRect().bottom,
+                           document.getElementById('views').getBoundingClientRect().bottom) + 12;
+      const bounds = cy.nodes().boundingBox({ includeOverlays: false });
+      const width = cy.width() - 2 * padding, height = Math.max(1, cy.height() - top - padding);
+      const zoom = Math.max(cy.minZoom(), Math.min(1.1, width / bounds.w, height / bounds.h));
+      cy.zoom(zoom);
+      cy.pan({ x: padding + (width - bounds.w * zoom) / 2 - bounds.x1 * zoom,
+               y: top + (height - bounds.h * zoom) / 2 - bounds.y1 * zoom });
+    }
+
+    // CoSE's force layout is approximate. Preserve its neighborhood structure,
+    // then separate the actual label-bearing boxes before fitting the camera.
+    function separateBoxes() {
+      const boxes = cy.nodes().map(node => {
+        const bounds = node.boundingBox({ includeOverlays: false });
+        return { node, ...node.position(), width: bounds.w, height: bounds.h };
+      });
+      for (let sweep = 0; sweep < 1000; sweep++) {
+        let overlaps = 0;
+        for (let i = 0; i < boxes.length; i++) {
+          for (let j = i + 1; j < boxes.length; j++) {
+            const a = boxes[i], b = boxes[j];
+            const dx = b.x - a.x, dy = b.y - a.y;
+            const x = (a.width + b.width) / 2 + 18 - Math.abs(dx);
+            const y = (a.height + b.height) / 2 + 18 - Math.abs(dy);
+            if (x <= .01 || y <= .01) continue;
+            overlaps++;
+            if (x < y) {
+              const move = (dx < 0 ? -1 : 1) * (x / 2 + .01);
+              a.x -= move;
+              b.x += move;
+            } else {
+              const move = (dy < 0 ? -1 : 1) * (y / 2 + .01);
+              a.y -= move;
+              b.y += move;
+            }
+          }
+        }
+        if (!overlaps) break;
+      }
+      cy.batch(() => boxes.forEach(box => box.node.position({ x: box.x, y: box.y })));
+    }
+
+    // As in best-practices.html, a single arrangement owns computation, fitting,
+    // and reveal. A replaced arrangement cannot reveal a later layout early.
+    function arrangeGraph(animateAfter = false) {
+      stopLiveLayout();
+      layoutAnchors = null;
+      positionTargets.clear();
+      document.getElementById('controls').inert = true;
+      document.getElementById('views').inert = true;
+      const restoreFocus = arrangement ? arrangement.restoreFocus : document.activeElement === graph;
+      if (arrangement) {
+        cancelAnimationFrame(arrangement.frame);
+        cy.off('render', arrangement.reveal);
+      }
+      const pending = {
+        frame: null,
+        restoreFocus,
+        reveal() {
+          if (arrangement !== pending) return;
+          arrangement = null;
+          graph.setAttribute('aria-busy', 'false');
+          document.getElementById('controls').inert = false;
+          document.getElementById('views').inert = false;
+          cy.autoungrabify(false);
+          cy.userPanningEnabled(true);
+          cy.userZoomingEnabled(true);
+          if (pending.restoreFocus) graph.focus({ preventScroll: true });
+          initialMotion = true;
+          startLiveLayout();
+        }
+      };
+      arrangement = pending;
+      graph.setAttribute('aria-busy', 'true');
+      cy.autoungrabify(true);
+      cy.userPanningEnabled(false);
+      cy.userZoomingEnabled(false);
+      pending.frame = requestAnimationFrame(() => {
+        cy.resize();
+        cy.elements().not('.filtered-out').layout({
+          name: 'cose', fit: false, animate: false, randomize: true,
+          nodeDimensionsIncludeLabels: true, nodeRepulsion: 4500,
+          nodeOverlap: 20, idealEdgeLength: edge => edge.data('length') ?? 65, componentSpacing: 32,
+          gravity: 1, numIter: animateAfter ? 20 : 1000
+        }).run();
+        // Sparse cutoffs can produce long component strips. Compact the long
+        // axis before resolving label collisions so the fitted map stays usable.
+        if (neighborhoodMap) {
+          const bounds = cy.nodes().boundingBox({ includeOverlays: false });
+          const ratio = (bounds.w / bounds.h) / (cy.width() / cy.height());
+          const scaleX = Math.min(1, 1 / ratio), scaleY = Math.min(1, ratio);
+          cy.nodes().positions(node => ({
+            x: (node.position('x') - bounds.x1) * scaleX,
+            y: (node.position('y') - bounds.y1) * scaleY
+          }));
+        }
+        separateBoxes();
+        layoutSeed = new Map(cy.nodes().map(node => [node.id(), { ...node.position() }]));
+        cy.one('render', pending.reveal);
+        fitView();
+        cy.forceRender();
+      });
+    }
+
+    function selectNode(node) {
+      cy.nodes().removeClass('focused');
+      selected = node;
+      if (node) node.addClass('focused');
+      graph.setAttribute('aria-label', node ? node.data('label') : 'Projects');
+      const bubble = document.getElementById('node-info');
+      bubble.replaceChildren();
+      bubble.hidden = !node;
+      if (!node) return;
+      const project = inventoryData.projects.find(project => project.id === node.id());
+      const name = document.createElement('strong');
+      name.id = 'node-info-name'; name.textContent = project.name;
+      const description = document.createElement('p'); description.textContent = project.description;
+      const activity = document.createElement('p');
+      activity.textContent = `${project.user_work.commit_count.toLocaleString()} personal commits · ${project.user_work.last_activity_date ?? 'No observed personal activity'}`;
+      const close = document.createElement('button');
+      close.type = 'button'; close.textContent = '×'; close.setAttribute('aria-label', 'Close project information');
+      close.addEventListener('click', () => { selectNode(null); graph.focus({ preventScroll: true }); });
+      bubble.append(close, name, description, activity);
+      for (const id of project.repository_ids) {
+        const repo = inventoryData.repositories.find(repo => repo.id === id);
+        const row = document.createElement('div'), link = document.createElement('a');
+        link.href = repo.url; link.target = '_blank'; link.rel = 'noopener noreferrer';
+        link.textContent = repo.full_name;
+        row.append(link); bubble.append(row);
+      }
+      positionNodeInfo();
+    }
+
+    function positionNodeInfo() {
+      if (!selected) return;
+      const bubble = document.getElementById('node-info');
+      const bounds = selected.renderedBoundingBox({ includeOverlays: false });
+      const width = bubble.offsetWidth, height = bubble.offsetHeight;
+      const top = document.getElementById('controls').getBoundingClientRect().bottom + 10;
+      const preferredX = bounds.x2 + 12 + width <= innerWidth - 12 ? bounds.x2 + 12 : bounds.x1 - width - 12;
+      bubble.style.left = Math.max(12, Math.min(innerWidth - width - 12, preferredX)) + 'px';
+      bubble.style.top = Math.max(top, Math.min(innerHeight - height - 12, (bounds.y1 + bounds.y2 - height) / 2)) + 'px';
+    }
+
+    graph.addEventListener('keydown', event => {
+      if (!cy || event.altKey || event.ctrlKey || event.metaKey) return;
+      if (event.key.toLowerCase() === 'r') {
+        event.preventDefault();
+        arrangeGraph();
+        return;
+      }
+      if (arrangement) return;
+      const delta = { ArrowLeft: [-24, 0], ArrowRight: [24, 0],
+                      ArrowUp: [0, -24], ArrowDown: [0, 24] }[event.key];
+      if (delta) {
+        event.preventDefault();
+        if (selected) {
+          const position = selected.position();
+          selected.position({ x: position.x + delta[0] / cy.zoom(),
+                              y: position.y + delta[1] / cy.zoom() });
+          positionTargets.set(selected.id(), { ...selected.position() });
+          startLiveLayout(selected);
+        } else cy.panBy({ x: -delta[0], y: -delta[1] });
+      } else if (event.key === '+' || event.key === '=' || event.key === '-') {
+        event.preventDefault();
+        const level = cy.zoom() * (event.key === '-' ? 1 / 1.2 : 1.2);
+        cy.zoom({ level: Math.max(cy.minZoom(), Math.min(cy.maxZoom(), level)),
+                  renderedPosition: { x: cy.width() / 2, y: cy.height() / 2 } });
+      } else if (event.key === 'Home') {
+        event.preventDefault();
+        fitView();
+      } else if (event.key === 'Escape') {
+        event.preventDefault();
+        selectNode(null);
+      }
+    });
+
+    async function loadJSON(path) {
+      const response = await fetch(path);
+      if (!response.ok) {
+        throw new Error(`Cannot load the repository graph: ${path} returned HTTP ${response.status}.`);
+      }
+      return response.json();
+    }
+
+    async function initialize() {
+      const parameters = new URLSearchParams(location.search);
+      const view = parameters.get('view') ?? 'embedded';
+      if (view !== 'curated' && view !== 'embedded') {
+        throw new Error('Choose view=curated or view=embedded.');
+      }
+      document.querySelector(`#views a[data-view="${view}"]`).setAttribute('aria-current', 'page');
+      const [inventory, map] = await Promise.all([
+        loadJSON('data/repos.json'),
+        loadJSON('data/neighborhoods.json')
+      ]);
+      inventoryData = inventory;
+      embeddedMap = map;
+      currentView = view;
+      neighborhoodMap = view === 'embedded' ? map : null;
+      if (map) {
+        const ids = new Set(inventory.projects.map(project => project.id));
+        if (map.node_ids.length !== ids.size || !map.node_ids.every(id => ids.has(id))) {
+          throw new Error('The neighborhood map and inventory cover different projects. Rebuild data/neighborhoods.json.');
+        }
+        graph.setAttribute('aria-description', view === 'embedded'
+          ? 'Embedded: the 2% distance cutoff plus each project’s two closest neighbors.'
+          : 'Curated project relationships.');
+      }
+      const measure = document.createElement('canvas').getContext('2d');
+      measure.font = '500 13px system-ui';
+      const elements = inventory.projects.map(project => {
+        const label = project.name;
+        const representative = inventory.repositories.find(repo => repo.id === project.repository_ids[0]);
+        return { data: { id: project.id, label, url: representative.url, labelWidth: Math.ceil(measure.measureText(label).width),
+          width: Math.ceil(measure.measureText(label).width), height: 16, padding: 9,
+          color: '#e9efeb', borderStyle: 'solid' } };
+      });
+      elements.push(...edgesForView(view));
+      cy = cytoscape({
+        container: graph, elements, layout: { name: 'preset' },
+        minZoom: .025, maxZoom: 4, boxSelectionEnabled: false,
+        autounselectify: true, desktopTapThreshold: 5, touchTapThreshold: 8,
+        style: [
+          { selector: 'node', style: {
+            shape: 'round-rectangle', width: 'data(width)', height: 'data(height)', padding: 'data(padding)',
+            label: 'data(label)', 'font-family': 'system-ui, sans-serif',
+            'font-size': 13, 'font-weight': 500, 'text-valign': 'center',
+            'text-halign': 'center', 'text-wrap': 'none', color: '#263a3c',
+            'background-color': 'data(color)', 'border-color': '#9aada5', 'border-style': 'data(borderStyle)',
+            'border-width': 1, 'overlay-opacity': 0
+          } },
+          { selector: 'node.focused', style: { 'border-color': '#345e62', 'border-width': 2.5 } },
+          { selector: 'edge', style: {
+            width: 1.3, 'line-color': '#9baaa4', 'line-opacity': .65,
+            'curve-style': 'bezier', 'target-arrow-shape': 'none',
+            'target-arrow-color': '#82978d', 'arrow-scale': .7, label: ''
+          } },
+          { selector: 'edge[?directed]', style: { 'target-arrow-shape': 'triangle' } },
+          { selector: 'edge.filtered-out', style: { display: 'none' } }
+        ]
+      });
+      cy.on('tap', 'node', event => {
+        if (selected === event.target) window.open(event.target.data('url'), '_blank', 'noopener,noreferrer');
+        else selectNode(event.target);
+        graph.focus({ preventScroll: true });
+      });
+      cy.on('position', 'node', event => { if (selected === event.target) positionNodeInfo(); });
+      cy.on('pan zoom resize', positionNodeInfo);
+      cy.on('tap', event => {
+        if (event.target === cy) selectNode(null);
+      });
+      cy.on('grab', 'node', () => { graph.style.cursor = 'grabbing'; draggedNode = null; });
+      cy.on('drag', 'node', event => {
+        draggedNode = event.target;
+        startLiveLayout(event.target);
+      });
+      cy.on('free', 'node', event => {
+        graph.style.cursor = '';
+        if (draggedNode === event.target) positionTargets.set(draggedNode.id(), { ...draggedNode.position() });
+        draggedNode = null;
+      });
+      let width = cy.width(), height = cy.height();
+      cy.on('resize', () => {
+        if (width === cy.width() && height === cy.height()) return;
+        width = cy.width();
+        height = cy.height();
+        if (!arrangement) fitView();
+      });
+      graphControls = attachGraphControls({ cy, inventory, embedded: view === 'embedded', onGraphChange({ resize }) {
+        stopLiveLayout();
+        if (resize) separateBoxes();
+        layoutSeed = new Map(cy.nodes().map(node => [node.id(), { ...node.position() }]));
+        layoutAnchors = new Map(layoutSeed);
+        positionTargets.clear();
+      } });
+      document.querySelectorAll('#views a').forEach(link => link.addEventListener('click', event => {
+        if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+        event.preventDefault();
+        switchView(link.dataset.view);
+      }));
+      addEventListener('popstate', () => switchView(new URLSearchParams(location.search).get('view') ?? 'embedded', true));
+      arrangeGraph(true);
+    }
+
+    initialize();
+  </script>
+</body>
+</html>
