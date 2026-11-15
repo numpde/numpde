@@ -196,14 +196,27 @@
       const bodies = cy.nodes(':visible').map(node => {
         const bounds = node.boundingBox({ includeOverlays: false });
         return {
-          node, radius: Math.hypot(bounds.w, bounds.h) / 2,
+          node, degree: 0,
           halfWidth: bounds.w / 2, halfHeight: bounds.h / 2,
           x: 0, y: 0, vx: 0, vy: 0, previousX: 0, previousY: 0
         };
       });
       const byId = new Map(bodies.map(body => [body.node.id(), body]));
-      const links = cy.edges().not('.filtered-out').map(edge =>
-        [byId.get(edge.source().id()), byId.get(edge.target().id()), edge.data('length') ?? 100]);
+      // Relationship types share one physical spring between a pair of nodes.
+      const pairs = new Map();
+      for (const edge of cy.edges().not('.filtered-out')) {
+        const ids = [edge.source().id(), edge.target().id()].sort();
+        const key = ids.join('\0');
+        if (pairs.has(key)) continue;
+        const a = byId.get(ids[0]), b = byId.get(ids[1]);
+        a.degree++; b.degree++;
+        pairs.set(key, { a, b, length: edge.data('length') ?? 65 });
+      }
+      const links = [...pairs.values()];
+      for (const link of links) {
+        // d3-force also reduces spring strength around highly connected nodes.
+        link.strength = .04 / Math.min(link.a.degree, link.b.degree);
+      }
       let previousTime = null;
       let quietSteps = 0;
       const tick = time => {
@@ -245,16 +258,14 @@
               }
               if (dx === 0 && dy === 0) { dx = 1; dy = 1; }
               const distance = Math.hypot(dx, dy);
-              const clearance = a.radius + b.radius + 30;
-              const force = (4000 / (distance * distance)
-                + Math.max(0, clearance - distance) * .12);
+              const force = 4000 / (distance * distance);
               const fx = dx / distance * force, fy = dy / distance * force;
               a.vx -= fx; a.vy -= fy;
               b.vx += fx; b.vy += fy;
             }
           }
-          for (const [a, b, length] of links) {
-            const dx = b.x - a.x, dy = b.y - a.y;
+          for (const { a, b, length, strength } of links) {
+            let dx = b.x - a.x, dy = b.y - a.y;
             if (local) {
               const restA = layoutAnchors.get(a.node.id()), restB = layoutAnchors.get(b.node.id());
               const fx = (dx - (restB.x - restA.x)) * .015;
@@ -262,8 +273,13 @@
               a.vx += fx; a.vy += fy; b.vx -= fx; b.vy -= fy;
               continue;
             }
-            const distance = Math.hypot(dx, dy) || 1;
-            const force = (distance - a.radius - b.radius - length) * .045;
+            if (dx === 0 && dy === 0) { dx = 1; dy = 1; }
+            const distance = Math.hypot(dx, dy);
+            const ux = Math.abs(dx) / distance, uy = Math.abs(dy) / distance;
+            // Measure the gap between rectangle boundaries along the edge.
+            const clearance = Math.min(a.halfWidth / ux, a.halfHeight / uy)
+              + Math.min(b.halfWidth / ux, b.halfHeight / uy);
+            const force = (distance - clearance - length) * strength;
             const fx = dx / distance * force, fy = dy / distance * force;
             a.vx += fx; a.vy += fy;
             b.vx -= fx; b.vy -= fy;
