@@ -605,12 +605,13 @@
         height = cy.height();
         if (!arrangement) fitView();
       });
-      graphControls = attachGraphControls({ cy, inventory, embedded: view === 'embedded', onGraphChange({ resize }) {
+      graphControls = attachGraphControls({ cy, inventory, embedded: view === 'embedded', onGraphChange({ resize, edgesChanged = false }) {
         stopLiveLayout();
         if (resize) separateBoxes();
         layoutSeed = new Map(cy.nodes().map(node => [node.id(), { ...node.position() }]));
-        layoutAnchors = new Map(layoutSeed);
+        layoutAnchors = edgesChanged ? null : new Map(layoutSeed);
         positionTargets.clear();
+        if (edgesChanged) startLiveLayout();
       } });
       document.querySelectorAll('#views a').forEach(link => link.addEventListener('click', event => {
         if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;

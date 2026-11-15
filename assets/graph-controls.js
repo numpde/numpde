@@ -231,7 +231,7 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
     applyAppearance();
     document.getElementById('edge-summary').textContent = `Include edges · ${cy.edges().not('.filtered-out').length}/${cy.edges().length}`;
     writeURL();
-    if (!initial) onGraphChange({ resize: sizeSelect.value === 'connections' });
+    if (!initial) onGraphChange({ resize: sizeSelect.value === 'connections', edgesChanged: true });
   }
   colorSelect.addEventListener('change', () => { applyAppearance(); writeURL(); });
   sizeSelect.addEventListener('change', () => { applyAppearance(); onGraphChange({ resize: true }); writeURL(); });
