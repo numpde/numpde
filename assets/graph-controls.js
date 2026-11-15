@@ -31,26 +31,21 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
   const contextColors = new Map(Object.keys(inventory.work_context_types).map((key, i) => [key, palette[i % palette.length]]));
   const colorModes = {
     none: { label: 'Uniform' },
-    domain: { label: 'Primary domain', colors: categoryColors, labelFor: title,
-      note: 'Uses the first listed domain of the project’s representative repository. Other domains remain in the inventory.' },
+    domain: { label: 'Primary domain', colors: categoryColors, labelFor: title },
     context: { label: 'Primary work context', colors: contextColors,
-      labelFor: key => inventory.work_context_types[key].label,
-      note: 'Uses the first listed work context of the representative repository.' },
-    visibility: { label: 'Visibility', colors: new Map([['public', '#d3e3d2'], ['private', '#e6cdbd']]), labelFor: title,
-      note: 'A project is private here if any of its repository records is private.' },
-    commits: { label: 'Personal commits', log: true, note: 'Unique attributable commit SHAs, including inferred identities. Log scale; this measures activity, not effort.' },
-    activity: { label: 'Last personal activity', date: true, note: 'Last observed personal activity, not the latest upstream commit. Earlier → more recent.' },
-    connections: { label: 'Visible connections', log: true, note: 'Distinct neighbors through currently included edges. Parallel relationship types count once.' }
+      labelFor: key => inventory.work_context_types[key].label },
+    visibility: { label: 'Visibility', colors: new Map([['public', '#d3e3d2'], ['private', '#e6cdbd']]), labelFor: title },
+    commits: { label: 'Personal commits', log: true },
+    activity: { label: 'Last personal activity', date: true },
+    connections: { label: 'Visible connections', log: true }
   };
   const sizeModes = {
     none: { label: 'Uniform' },
     commits: colorModes.commits,
     connections: colorModes.connections,
-    repositories: { label: 'Repository count', log: true, note: 'Number of repository records grouped into the project; not a measure of work.' },
-    complexity: { label: 'Codebase complexity (estimate)', max: 100,
-      note: 'Whole-codebase complexity of the representative repository, including upstream work. Scale: 0–100.' },
-    difficulty: { label: 'Contribution difficulty (estimate)', max: 100,
-      note: 'Estimated difficulty of your contribution. Unassessed projects stay unknown; merged repository estimates are not combined.' }
+    repositories: { label: 'Repository count', log: true },
+    complexity: { label: 'Codebase complexity (estimate)', max: 100 },
+    difficulty: { label: 'Contribution difficulty (estimate)', max: 100 }
   };
   function populate(select, modes, parameter) {
     for (const [value, mode] of Object.entries(modes)) select.add(new Option(mode.label, value));
@@ -60,7 +55,7 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
   populate(sizeSelect, sizeModes, 'size');
 
   const groups = [];
-  function checklist(key, heading, choices, { actions = false, note = '' } = {}) {
+  function checklist(key, heading, choices, { actions = false } = {}) {
     const fieldset = document.createElement('fieldset');
     const headingElement = document.createElement('legend');
     headingElement.textContent = heading;
@@ -85,7 +80,6 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
     }
     for (const choice of choices) {
       const label = document.createElement('label');
-      if (choice.description) label.title = choice.description;
       const input = document.createElement('input');
       input.type = 'checkbox'; input.name = key; input.value = choice.value;
       input.checked = selected.has(choice.value);
@@ -93,7 +87,6 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
       label.append(input, document.createTextNode(choice.label));
       fieldset.append(label); group.inputs.push(input);
     }
-    if (note) { const paragraph = document.createElement('p'); paragraph.textContent = note; fieldset.append(paragraph); }
     edgeOptions.append(fieldset); groups.push(group);
     return () => new Set(group.inputs.filter(input => input.checked).map(input => input.value));
   }
@@ -102,21 +95,20 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
   groups.length = 0;
   edgeOptions.replaceChildren();
   if (embedded) {
-    selectedRules = checklist('rules', 'Include either selection rule', [
+    selectedRules = checklist('rules', 'Selection rules', [
       { value: 'cutoff', label: 'Within the 2% distance cutoff' },
       { value: 'nearest', label: 'Each project’s two nearest neighbors' }
-    ], { note: 'The union of the selected rules is shown. An edge can satisfy both rules. All project nodes stay visible.' });
+    ]);
   } else {
     selectedTypes = checklist('types', 'Relationship types', Object.entries(inventory.link_types).map(([value, type]) => ({
-      value, label: type.label, description: type.description
+      value, label: type.label
     })), { actions: true });
     selectedBases = checklist('basis', 'Evidence basis', [
       { value: 'established', label: 'Established' },
       { value: 'interpretive', label: 'Interpretive' },
       { value: 'prospective', label: 'Prospective' }
-    ], { note: 'A proposed transfer or integration stays prospective, even at high confidence.' });
-    selectedConfidence = checklist('confidence', 'Confidence', ['high', 'medium', 'low'].map(value => ({ value, label: title(value) })),
-      { note: 'A relationship is included if a supporting interpretation matches both the selected basis and confidence.' });
+    ]);
+    selectedConfidence = checklist('confidence', 'Confidence', ['high', 'medium', 'low'].map(value => ({ value, label: title(value) })));
   }
   }
 
@@ -186,7 +178,6 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
   function renderLegend(colorMode, colorScale, sizeMode, sizeScale) {
     legend.replaceChildren();
     const heading = text => { const element = document.createElement('h3'); element.textContent = text; legend.append(element); };
-    const note = text => { const element = document.createElement('p'); element.textContent = text; legend.append(element); };
     heading('Color · ' + colorMode.label);
     if (colorMode.colors) {
       const counts = new Map();
@@ -205,15 +196,25 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
         const text = document.createElement('span'); text.textContent = colorMode.date ? new Date(value).toISOString().slice(0, 10) : value.toLocaleString(); range.append(text);
       }
       legend.append(bar, range);
-      if ([...info.values()].some(item => !known(item[colorSelect.value]))) note('Unknown values are gray.');
-    } else if (colorScale) note('No known values. Unknown values are gray.');
-    if (colorMode.note) note(colorMode.note);
+    }
+    if (colorScale && [...info.values()].some(item => !known(item[colorSelect.value]))) {
+      const row = document.createElement('div'), swatch = document.createElement('span');
+      row.className = 'legend-entry'; swatch.className = 'legend-swatch';
+      swatch.style.background = '#d8d8d8';
+      row.append(swatch, document.createTextNode('Unknown')); legend.append(row);
+    }
     heading('Size · ' + sizeMode.label);
     if (sizeScale) {
-      note(`Range: ${sizeScale.min.toLocaleString()}–${sizeScale.max.toLocaleString()}. ${sizeMode.note}`);
-      if ([...info.values()].some(item => !known(item[sizeSelect.value]))) note('Unknown values use a small node with a dashed outline; known zero values have a solid outline.');
-    } else note('All labels use the same font size.');
-    if (colorSelect.value === 'none' && sizeSelect.value === 'none') note('Choose a color or size attribute to compare projects.');
+      const range = document.createElement('div');
+      range.textContent = `${sizeScale.min.toLocaleString()}–${sizeScale.max.toLocaleString()}`;
+      legend.append(range);
+      if ([...info.values()].some(item => !known(item[sizeSelect.value]))) {
+        const row = document.createElement('div'), swatch = document.createElement('span');
+        row.className = 'legend-entry'; swatch.className = 'legend-swatch';
+        swatch.style.borderStyle = 'dashed';
+        row.append(swatch, document.createTextNode('Unknown')); legend.append(row);
+      }
+    }
   }
   function filterEdges(initial = false) {
     const rules = embedded ? selectedRules() : null;
