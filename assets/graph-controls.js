@@ -37,6 +37,8 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
     visibility: { label: 'Visibility', colors: new Map([['public', '#d3e3d2'], ['private', '#e6cdbd']]), labelFor: title },
     commits: { label: 'Personal commits', log: true },
     activity: { label: 'Last personal activity', date: true },
+    difficulty: { label: 'Contribution difficulty (estimate)', max: 100,
+      gradient: [[255, 247, 220], [239, 151, 57]] },
     connections: { label: 'Visible connections', log: true }
   };
   const sizeModes = {
@@ -45,7 +47,7 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
     connections: colorModes.connections,
     repositories: { label: 'Repository count', log: true },
     complexity: { label: 'Codebase complexity (estimate)', max: 100 },
-    difficulty: { label: 'Contribution difficulty (estimate)', max: 100 }
+    difficulty: colorModes.difficulty
   };
   function populate(select, modes, parameter) {
     for (const [value, mode] of Object.entries(modes)) select.add(new Option(mode.label, value));
@@ -151,8 +153,8 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
       return Math.max(0, Math.min(1, mode.log ? Math.log1p(value) / Math.log1p(max) : (value - min) / (max - min)));
     } };
   }
-  function gradient(ratio) {
-    const low = [237, 241, 237], high = [115, 183, 170];
+  function gradient(ratio, mode) {
+    const [low, high] = mode.gradient ?? [[237, 241, 237], [115, 183, 170]];
     return '#' + low.map((value, i) => Math.round(value + (high[i] - value) * ratio).toString(16).padStart(2, '0')).join('');
   }
   function applyAppearance() {
@@ -166,10 +168,10 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
         if (colorMode.colors) color = colorMode.colors.get(item[colorSelect.value]) ?? '#d8d8d8';
         else if (colorScale) {
           const ratio = colorScale.ratio(item[colorSelect.value]);
-          color = ratio === null ? '#d8d8d8' : gradient(ratio);
+          color = ratio === null ? '#d8d8d8' : gradient(ratio, colorMode);
         }
         const ratio = sizeScale ? sizeScale.ratio(item[sizeSelect.value]) : 0;
-        const size = ratio ?? 0;
+        const size = (ratio ?? 0) * (sizeSelect.value === 'difficulty' ? 2.5 : 1);
         node.data({ color, width: node.data('labelWidth') + 12 * size,
           height: 16 + 16 * size, padding: sizeScale ? 6 + 8 * size : 9,
           borderStyle: sizeScale && ratio === null ? 'dashed' : 'solid' });
@@ -194,6 +196,7 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
     } else if (colorScale && colorScale.knownCount) {
       const bar = document.createElement('div'), range = document.createElement('div');
       bar.className = 'legend-gradient'; range.className = 'legend-range';
+      bar.style.background = `linear-gradient(to right, ${gradient(0, colorMode)}, ${gradient(1, colorMode)})`;
       for (const value of [colorScale.min, colorScale.max]) {
         const text = document.createElement('span'); text.textContent = colorMode.date ? new Date(value).toISOString().slice(0, 10) : value.toLocaleString(); range.append(text);
       }
