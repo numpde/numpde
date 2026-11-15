@@ -48,11 +48,11 @@
       display: grid; place-content: center; background: #25303d; }
     .control-panel input.legend-toggle:checked { background: var(--swatch-color); }
     .legend-toggle::after { content: ''; width: 8px; height: 5px;
-      border-left: 2px solid var(--text); border-bottom: 2px solid var(--text);
+      border-left: 2px solid #14212a; border-bottom: 2px solid #14212a;
       transform: translateY(-1px) rotate(-45deg); opacity: 0; }
     .legend-toggle:checked::after { opacity: 1; }
     .legend-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-    .legend-gradient { height: 12px; border-radius: 3px; background: linear-gradient(to right, #202b39, #247563); }
+    .legend-gradient { height: 12px; border-radius: 3px; background: linear-gradient(to right, #d2dee7, #53b9a0); }
     .legend-range { display: flex; justify-content: space-between; gap: 12px; margin-top: 5px; }
     #node-info { position: fixed; width: min(320px, calc(100vw - 24px)); max-height: 40vh;
       overflow: auto; padding: 14px; border: 1px solid var(--border); border-radius: 10px;
@@ -662,13 +662,13 @@
           : 'Curated project relationships.');
       }
       const measure = document.createElement('canvas').getContext('2d');
-      measure.font = '500 13px system-ui';
+      measure.font = '600 13px system-ui';
       const elements = inventory.projects.map(project => {
         const label = project.name;
         const representative = inventory.repositories.find(repo => repo.id === project.repository_ids[0]);
         return { data: { id: project.id, label, url: representative.url, labelWidth: Math.ceil(measure.measureText(label).width),
           width: Math.ceil(measure.measureText(label).width), height: 16, padding: 9,
-          color: '#25303d', borderStyle: 'solid', selectionStrength: 0 } };
+          color: '#bac5cf', borderStyle: 'solid', selectionStrength: 0 } };
       });
       elements.push(...edgesForView(view));
       cy = cytoscape({
@@ -679,8 +679,8 @@
           { selector: 'node', style: {
             shape: 'round-rectangle', width: 'data(width)', height: 'data(height)', padding: 'data(padding)',
             label: 'data(label)', 'font-family': 'system-ui, sans-serif',
-            'font-size': 13, 'font-weight': 500, 'text-valign': 'center',
-            'text-halign': 'center', 'text-wrap': 'none', color: '#e6edf3',
+            'font-size': 13, 'font-weight': 600, 'text-valign': 'center',
+            'text-halign': 'center', 'text-wrap': 'none', color: '#14212a',
             'background-color': 'data(color)', 'border-style': 'data(borderStyle)',
             'border-color': 'mapData(selectionStrength, 0, 1, #4d6170, #9fe4cf)',
             'border-width': 'mapData(selectionStrength, 0, 1, 1, 3.5)', 'overlay-opacity': 0

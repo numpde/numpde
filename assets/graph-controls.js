@@ -25,9 +25,9 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
     }];
   }));
   const title = text => text.replace(/[-_]/g, ' ').replace(/^./, letter => letter.toUpperCase());
-  const palette = ['#28554d', '#444568', '#63502f', '#623c4d', '#435630', '#304e6b', '#564169',
-    '#605a2d', '#28545d', '#674432', '#3d5348', '#3d4968', '#4e592f', '#594b3d', '#365867',
-    '#633c60', '#35534f', '#4d4568', '#4b572f', '#64513b', '#414956'];
+  const palette = ['#85c9b7', '#b4b0e0', '#e3bd86', '#d9a2bb', '#b1ca83', '#93bee4', '#c9a8df',
+    '#ddd08a', '#8cccd0', '#e6ad8c', '#abc5ad', '#a6b3dd', '#c1d796', '#cfb59c', '#99c2d2',
+    '#daa5d4', '#9ac9b9', '#bcb0de', '#c1cc8c', '#dfc39b', '#b8c2ce'];
   const categoryColors = new Map(Object.keys(inventory.category_definitions).map((key, i) => [key, palette[i % palette.length]]));
   const contextColors = new Map(Object.keys(inventory.work_context_types).map((key, i) => [key, palette[i % palette.length]]));
   const colorModes = {
@@ -35,11 +35,11 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
     domain: { label: 'Primary domain', colors: categoryColors, labelFor: title },
     context: { label: 'Primary work context', colors: contextColors,
       labelFor: key => inventory.work_context_types[key].label },
-    visibility: { label: 'Visibility', colors: new Map([['public', '#285443'], ['private', '#634632']]), labelFor: title },
+    visibility: { label: 'Visibility', colors: new Map([['public', '#91ceb2'], ['private', '#e3b388']]), labelFor: title },
     commits: { label: 'Personal commits', log: true },
     activity: { label: 'Last personal activity', date: true },
     difficulty: { label: 'Contribution difficulty', max: 100,
-      gradient: [[44, 37, 34], [157, 78, 21]] },
+      gradient: [[247, 231, 195], [238, 155, 70]] },
     connections: { label: 'Visible connections', log: true }
   };
   const sizeModes = {
@@ -170,7 +170,7 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
     } };
   }
   function gradient(ratio, mode) {
-    const [low, high] = mode.gradient ?? [[32, 43, 57], [36, 117, 99]];
+    const [low, high] = mode.gradient ?? [[210, 222, 231], [83, 185, 160]];
     return '#' + low.map((value, i) => Math.round(value + (high[i] - value) * ratio).toString(16).padStart(2, '0')).join('');
   }
   function applyAppearance(render = true) {
@@ -180,15 +180,15 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
     cy.batch(() => {
       for (const node of cy.nodes()) {
         const item = info.get(node.id());
-        let color = '#25303d';
+        let color = '#bac5cf';
         if (colorMode.colors) {
           const category = item[colorSelect.value];
           color = mutedCategories.get(colorSelect.value).has(category)
-            ? '#25303d' : colorMode.colors.get(category) ?? '#414958';
+            ? '#bac5cf' : colorMode.colors.get(category) ?? '#aab2bd';
         }
         else if (colorScale) {
           const ratio = colorScale.ratio(item[colorSelect.value]);
-          color = ratio === null ? '#414958' : gradient(ratio, colorMode);
+          color = ratio === null ? '#aab2bd' : gradient(ratio, colorMode);
         }
         const ratio = sizeScale ? sizeScale.ratio(item[sizeSelect.value]) : 0;
         const size = (ratio ?? 0) * (sizeSelect.value === 'difficulty' ? 2.5 : 1);
@@ -212,7 +212,7 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
         row.className = 'legend-entry'; swatch.className = 'legend-swatch legend-toggle';
         swatch.type = 'checkbox'; swatch.name = 'legend-' + mode; swatch.value = key ?? '';
         swatch.checked = !muted.has(key);
-        swatch.style.setProperty('--swatch-color', colorMode.colors.get(key) ?? '#414958');
+        swatch.style.setProperty('--swatch-color', colorMode.colors.get(key) ?? '#aab2bd');
         swatch.addEventListener('change', () => {
           if (swatch.checked) muted.delete(key);
           else muted.add(key);
@@ -234,7 +234,7 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
     if (colorScale && [...info.values()].some(item => !known(item[colorSelect.value]))) {
       const row = document.createElement('div'), swatch = document.createElement('span');
       row.className = 'legend-entry'; swatch.className = 'legend-swatch';
-      swatch.style.background = '#414958';
+      swatch.style.background = '#aab2bd';
       row.append(swatch, document.createTextNode('Unknown')); legend.append(row);
     }
     if (sizeSelect.value !== 'none') heading('Size · ' + sizeMode.label);
