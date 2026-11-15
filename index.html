@@ -3,60 +3,63 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10161e">
   <title>Projects</title>
   <style>
-    :root { color-scheme: light; background: #f6f4ef; }
+    :root { color-scheme: dark; background: #10161e; color: #e6edf3;
+      --surface: #19232e; --raised: #253342; --border: #435566;
+      --text: #e6edf3; --muted: #b1c2ce; --accent: #9ddcc8; }
     * { box-sizing: border-box; }
     html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
     #graph { position: fixed; inset: 0; touch-action: none; outline: none; }
     #graph[aria-busy="true"] { visibility: hidden; }
-    #graph:focus-visible { box-shadow: inset 0 0 0 2px #586d73; }
+    #graph:focus-visible { box-shadow: inset 0 0 0 2px var(--accent); }
     #views { position: fixed; top: 12px; right: 12px; display: flex; gap: 4px; }
     #views a { display: grid; place-items: center; width: 44px; height: 44px;
-      color: #586d73; background: #f6f4ef; border: 1px solid #bac6be; border-radius: 6px; }
-    #views a[aria-current="page"] { color: #263a3c; background: #dce7df; border-color: #586d73; }
-    #views a:focus-visible { outline: 2px solid #345e62; outline-offset: 2px; }
+      color: var(--muted); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
+    #views a[aria-current="page"] { color: var(--accent); background: var(--raised); border-color: var(--accent); }
+    #views a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     #views svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.6; }
     #controls { position: fixed; top: 12px; left: 12px; width: min(650px, calc(100% - 120px));
       display: grid; grid-template-columns: 1fr 1fr 1.15fr auto; align-items: end; gap: 8px;
-      font: 12px system-ui, sans-serif; color: #263a3c; }
+      font: 12px system-ui, sans-serif; color: var(--text); }
     #controls > label { display: grid; gap: 4px; min-width: 0; }
     #controls select, #controls summary { width: 100%; min-height: 40px; padding: 8px;
-      border: 1px solid #bac6be; border-radius: 6px; color: inherit; background: #f6f4ef;
+      border: 1px solid var(--border); border-radius: 6px; color: inherit; background: var(--surface);
       font: inherit; cursor: pointer; }
     #controls select:focus-visible, #controls summary:focus-visible,
-    #controls button:focus-visible { outline: 2px solid #345e62; outline-offset: 2px; }
+    #controls button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     #controls details { min-width: 0; }
-    #controls details[open] > summary { background: #dce7df; border-color: #586d73; }
+    #controls details[open] > summary { background: var(--raised); border-color: var(--accent); }
     .control-panel { position: absolute; top: calc(100% + 8px); left: 0; width: min(360px, calc(100vw - 24px));
       max-height: min(65vh, 520px); overflow: auto; overscroll-behavior: contain; padding: 14px;
-      background: #f6f4ef; border: 1px solid #bac6be; border-radius: 8px; box-shadow: 0 6px 20px #263a3c1f; }
+      background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 6px 20px #00000066; }
     .control-panel fieldset { border: 0; padding: 0; margin: 0 0 14px; }
     .control-panel legend { font-weight: 600; margin-bottom: 6px; }
     .control-panel label { display: flex; align-items: center; gap: 8px; min-height: 32px; cursor: pointer; }
-    .control-panel input { accent-color: #345e62; width: 16px; height: 16px; flex: 0 0 auto; }
+    .control-panel input { accent-color: var(--accent); width: 16px; height: 16px; flex: 0 0 auto; }
     .control-panel h3 { font-size: 12px; margin: 0 0 8px; }
     .filter-actions { display: flex; gap: 8px; margin-bottom: 8px; }
     .filter-actions button { font: inherit; padding: 4px 10px; background: transparent;
-      color: inherit; border: 1px solid #bac6be; border-radius: 4px; cursor: pointer; }
+      color: inherit; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; }
     .legend-entry { display: flex; align-items: center; gap: 8px; min-height: 26px; }
-    .legend-swatch { width: 16px; height: 16px; border: 1px solid #8a9e96; border-radius: 3px; flex: 0 0 auto; }
+    .legend-swatch { width: 16px; height: 16px; border: 1px solid #718596; border-radius: 3px; flex: 0 0 auto; }
     .control-panel input.legend-toggle { appearance: none; margin: 0; cursor: pointer;
-      display: grid; place-content: center; background: #e9efeb; }
+      display: grid; place-content: center; background: #25303d; }
     .control-panel input.legend-toggle:checked { background: var(--swatch-color); }
     .legend-toggle::after { content: ''; width: 8px; height: 5px;
-      border-left: 2px solid #263a3c; border-bottom: 2px solid #263a3c;
+      border-left: 2px solid var(--text); border-bottom: 2px solid var(--text);
       transform: translateY(-1px) rotate(-45deg); opacity: 0; }
     .legend-toggle:checked::after { opacity: 1; }
-    .legend-toggle:focus-visible { outline: 2px solid #345e62; outline-offset: 2px; }
-    .legend-gradient { height: 12px; border-radius: 3px; background: linear-gradient(to right, #edf1ed, #73b7aa); }
+    .legend-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .legend-gradient { height: 12px; border-radius: 3px; background: linear-gradient(to right, #202b39, #247563); }
     .legend-range { display: flex; justify-content: space-between; gap: 12px; margin-top: 5px; }
     #node-info { position: fixed; width: min(320px, calc(100vw - 24px)); max-height: 40vh;
-      overflow: auto; padding: 14px; border: 1px solid #9aada5; border-radius: 10px;
-      background: #f6f4ef; color: #263a3c; box-shadow: 0 5px 20px #263a3c26;
+      overflow: auto; padding: 14px; border: 1px solid var(--border); border-radius: 10px;
+      background: var(--surface); color: var(--text); box-shadow: 0 5px 20px #00000080;
       font: 12px/1.5 system-ui, sans-serif; }
     #node-info p { margin: 8px 0; }
-    #node-info a { color: #345e62; overflow-wrap: anywhere; }
+    #node-info a { color: var(--accent); overflow-wrap: anywhere; }
     #node-info strong { padding-right: 24px; display: block; cursor: grab;
       touch-action: none; user-select: none; }
     #node-info.dragging strong { cursor: grabbing; }
@@ -665,7 +668,7 @@
         const representative = inventory.repositories.find(repo => repo.id === project.repository_ids[0]);
         return { data: { id: project.id, label, url: representative.url, labelWidth: Math.ceil(measure.measureText(label).width),
           width: Math.ceil(measure.measureText(label).width), height: 16, padding: 9,
-          color: '#e9efeb', borderStyle: 'solid', selectionStrength: 0 } };
+          color: '#25303d', borderStyle: 'solid', selectionStrength: 0 } };
       });
       elements.push(...edgesForView(view));
       cy = cytoscape({
@@ -677,16 +680,16 @@
             shape: 'round-rectangle', width: 'data(width)', height: 'data(height)', padding: 'data(padding)',
             label: 'data(label)', 'font-family': 'system-ui, sans-serif',
             'font-size': 13, 'font-weight': 500, 'text-valign': 'center',
-            'text-halign': 'center', 'text-wrap': 'none', color: '#263a3c',
+            'text-halign': 'center', 'text-wrap': 'none', color: '#e6edf3',
             'background-color': 'data(color)', 'border-style': 'data(borderStyle)',
-            'border-color': 'mapData(selectionStrength, 0, 1, #9aada5, #345e62)',
+            'border-color': 'mapData(selectionStrength, 0, 1, #4d6170, #9fe4cf)',
             'border-width': 'mapData(selectionStrength, 0, 1, 1, 3.5)', 'overlay-opacity': 0
           } },
           { selector: 'edge', style: {
             events: 'no', 'overlay-opacity': 0,
-            width: 1.3, 'line-color': '#9baaa4', 'line-opacity': .65,
+            width: 1.3, 'line-color': '#667b88', 'line-opacity': .6,
             'curve-style': 'bezier', 'target-arrow-shape': 'none',
-            'target-arrow-color': '#82978d', 'arrow-scale': .7, label: ''
+            'target-arrow-color': '#8299a8', 'arrow-scale': .7, label: ''
           } },
           { selector: 'edge[?directed]', style: { 'target-arrow-shape': 'triangle' } },
           { selector: 'edge.filtered-out', style: { display: 'none' } }
