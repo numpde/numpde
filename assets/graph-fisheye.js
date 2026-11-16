@@ -96,6 +96,7 @@ function attachGraphFisheye({ cy, graph }) {
       uniform float distortion;
       uniform vec2 focus;
       uniform float reach;
+      uniform float diameter;
       varying ${precision} vec2 uv;
       void main() {
         vec2 offset = uv * 2.0 - 1.0;
@@ -106,6 +107,12 @@ function attachGraphFisheye({ cy, graph }) {
         float sourceRadius = -log(1.0 - radius * (1.0 - exp(-distortion))) / distortion;
         vec2 sampleOffset = radius > 0.00001 ? offset * sourceRadius / radius : vec2(0.0);
         gl_FragColor = texture2D(graphImage, focus + sampleOffset * reach);
+        // Keep the crosshair small in screen pixels, independent of zoom.
+        vec2 p = abs((uv - 0.5) * diameter);
+        float hair = min(max(p.x - 5.0, p.y - 0.6), max(p.y - 5.0, p.x - 0.6));
+        float outline = min(max(p.x - 6.0, p.y - 1.6), max(p.y - 6.0, p.x - 1.6));
+        gl_FragColor = mix(gl_FragColor, vec4(0.06, 0.09, 0.12, 1.0), 1.0 - smoothstep(-0.25, 0.25, outline));
+        gl_FragColor = mix(gl_FragColor, vec4(0.8, 0.94, 0.9, 1.0), 1.0 - smoothstep(-0.25, 0.25, hair));
       }
     `);
     gl.compileShader(fragment);
@@ -141,7 +148,8 @@ function attachGraphFisheye({ cy, graph }) {
     source.width = source.height = tileSize;
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, atlasSize, atlasSize, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
     return { gl, atlasSize, tileSize, tiles: new Map(), version: -1, modelScale: null,
-      focus: gl.getUniformLocation(program, 'focus'), reach: gl.getUniformLocation(program, 'reach') };
+      focus: gl.getUniformLocation(program, 'focus'), reach: gl.getUniformLocation(program, 'reach'),
+      diameter: gl.getUniformLocation(program, 'diameter') };
   }
 
   function updateTiles(graphRenderer, focusX, focusY, radius, scale, modelScale) {
@@ -248,6 +256,7 @@ function attachGraphFisheye({ cy, graph }) {
     const { gl } = renderer;
     gl.viewport(0, 0, size, size);
     gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniform1f(renderer.diameter, diameter);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
     lens.hidden = false;
   }
