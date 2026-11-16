@@ -8,7 +8,7 @@
   <style>
     :root { color-scheme: dark; background: #10161e; color: #e6edf3;
       --surface: #19232e; --raised: #253342; --border: #435566;
-      --text: #e6edf3; --muted: #b1c2ce; --accent: #9ddcc8; }
+      --text: #e6edf3; --muted: #b1c2ce; --accent: #9ddcc8; --control-height: 44px; }
     * { box-sizing: border-box; }
     html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
     #graph { position: fixed; inset: 0; touch-action: none; outline: none; }
@@ -17,7 +17,7 @@
     #graph:has(+ #fisheye:not([hidden])) canvas { cursor: none !important; }
     #graph:focus-visible { box-shadow: inset 0 0 0 2px var(--accent); }
     #views { position: fixed; z-index: 10; top: 12px; right: 12px; display: flex; gap: 4px; }
-    #views a, #views button { display: grid; place-items: center; width: 44px; height: 44px;
+    #views a, #views button { display: grid; place-items: center; width: var(--control-height); height: var(--control-height);
       color: var(--muted); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
     #views button { padding: 0; cursor: pointer; }
     #views button:disabled { opacity: .4; cursor: default; }
@@ -32,7 +32,7 @@
       display: grid; grid-template-columns: 1fr 1fr 1.15fr auto; align-items: end; gap: 8px;
       font: 12px system-ui, sans-serif; color: var(--text); }
     #controls > label { display: grid; gap: 4px; min-width: 0; }
-    #controls select, #controls summary { width: 100%; min-height: 40px; padding: 8px;
+    #controls select, #controls summary { width: 100%; height: var(--control-height); padding: 8px;
       border: 1px solid var(--border); border-radius: 6px; color: inherit; background: var(--surface);
       font: inherit; line-height: 20px; cursor: pointer; }
     #controls summary { display: flex; align-items: center; gap: 6px; list-style: none; }
@@ -80,7 +80,6 @@
     #graph[aria-busy="true"] ~ #fisheye { visibility: hidden; }
     @media (max-width: 650px) {
       #controls { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px; }
-      #controls select, #controls summary { min-height: 44px; }
     }
   </style>
   <script src="assets/vendor/cytoscape-3.34.4.min.js"></script>
