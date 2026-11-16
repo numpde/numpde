@@ -93,12 +93,12 @@
   </style>
   <script src="assets/vendor/cytoscape-3.34.4.min.js"></script>
   <script src="assets/graph-controls.js?v=dcf15a4173ad"></script>
-  <script src="assets/graph-fisheye.js?v=49ad4f67600d"></script>
+  <script src="assets/graph-fisheye.js?v=76ae9fa5ea44"></script>
 </head>
 <body>
   <main id="graph" tabindex="0" aria-label="Projects" aria-busy="true"></main>
   <canvas id="fisheye" hidden aria-hidden="true"></canvas>
-  <div id="lens-status" role="status" hidden><a id="lens-repo" target="_blank" rel="noopener noreferrer"></a><span id="lens-description"></span></div>
+  <div id="lens-status" role="status" hidden><div id="lens-description"></div><div id="lens-repositories"></div></div>
   <section id="controls" aria-label="Graph appearance and connections" inert>
     <label><select id="color-by" aria-label="Color by"></select></label>
     <label><select id="size-by" aria-label="Size by"></select></label>
@@ -682,8 +682,7 @@
         const label = project.name;
         const representative = inventory.repositories.find(repo => repo.id === project.repository_ids[0]);
         return { position: savedLayout?.positions[project.id],
-          data: { id: project.id, label, description: project.description,
-          url: representative.url, labelWidth: Math.ceil(measure.measureText(label).width),
+          data: { id: project.id, label, url: representative.url, labelWidth: Math.ceil(measure.measureText(label).width),
           width: Math.ceil(measure.measureText(label).width), height: 16, padding: 9,
           color: '#bac5cf', textColor: '#14212a', borderStyle: 'solid', selectionStrength: 0 } };
       });
@@ -752,7 +751,7 @@
         positionTargets.clear();
         startLiveLayout();
       } });
-      fisheye = attachGraphFisheye({ cy, graph });
+      fisheye = attachGraphFisheye({ cy, graph, inventory });
       document.querySelectorAll('#views a').forEach(link => link.addEventListener('click', event => {
         if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
         event.preventDefault();

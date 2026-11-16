@@ -1,12 +1,15 @@
 /* A focus-and-context lens: redraw and distort pixels, never graph positions.
  * https://bost.ocks.org/mike/fisheye/
  */
-function attachGraphFisheye({ cy, graph }) {
+function attachGraphFisheye({ cy, graph, inventory }) {
   const toggle = document.getElementById('fisheye-toggle');
   const lens = document.getElementById('fisheye');
   const status = document.getElementById('lens-status');
-  const statusLink = document.getElementById('lens-repo');
   const statusDescription = document.getElementById('lens-description');
+  const statusRepositories = document.getElementById('lens-repositories');
+  const projects = new Map(inventory.projects.map(project => [project.id, project]));
+  const repositories = new Map(inventory.repositories.map(repo => [repo.id, repo]));
+  let statusNode = null;
   const source = document.createElement('canvas');
   const sourceContext = source.getContext('2d', { alpha: false });
   const background = getComputedStyle(document.documentElement).backgroundColor;
@@ -203,8 +206,9 @@ function attachGraphFisheye({ cy, graph }) {
     lens.hidden = true;
     if (!enabled || document.hidden || graph.getAttribute('aria-busy') === 'true') {
       status.hidden = true;
-      statusLink.removeAttribute('href');
-      statusLink.textContent = statusDescription.textContent = '';
+      statusNode = null;
+      statusDescription.textContent = '';
+      statusRepositories.replaceChildren();
     }
     if (frame !== null) cancelAnimationFrame(frame);
     frame = null;
@@ -285,14 +289,19 @@ function attachGraphFisheye({ cy, graph }) {
     gl.uniform1f(renderer.diameter, diameter);
     const node = graphRenderer.findNearestElements(modelX, modelY, true, false).find(element => element.isNode());
     gl.uniform1f(renderer.overNode, node ? 1 : 0);
-    if (node) {
-      const url = node.data('url'), description = node.data('description');
-      if (statusLink.href !== url) {
-        statusLink.href = url;
-        statusLink.textContent = url;
+    if (node && statusNode !== node.id()) {
+      statusNode = node.id();
+      const project = projects.get(statusNode);
+      statusDescription.textContent = project.description;
+      statusRepositories.replaceChildren();
+      for (const id of project.repository_ids) {
+        const repo = repositories.get(id);
+        const row = document.createElement('div'), link = document.createElement('a');
+        link.href = repo.url; link.target = '_blank'; link.rel = 'noopener noreferrer';
+        link.textContent = repo.full_name;
+        row.append(link, document.createTextNode(` · ${repo.visibility}`));
+        statusRepositories.append(row);
       }
-      const text = description ? ' · ' + description : '';
-      if (statusDescription.textContent !== text) statusDescription.textContent = text;
       status.hidden = false;
     }
     gl.drawArrays(gl.TRIANGLES, 0, 6);
