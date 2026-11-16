@@ -4,6 +4,7 @@
 function attachGraphFisheye({ cy, graph }) {
   const toggle = document.getElementById('fisheye-toggle');
   const lens = document.getElementById('fisheye');
+  const status = document.getElementById('lens-status');
   const source = document.createElement('canvas');
   const sourceContext = source.getContext('2d', { alpha: false });
   const background = getComputedStyle(document.documentElement).backgroundColor;
@@ -198,6 +199,8 @@ function attachGraphFisheye({ cy, graph }) {
 
   function hide() {
     lens.hidden = true;
+    status.hidden = true;
+    status.textContent = '';
     if (frame !== null) cancelAnimationFrame(frame);
     frame = null;
   }
@@ -263,8 +266,11 @@ function attachGraphFisheye({ cy, graph }) {
     gl.viewport(0, 0, size, size);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.uniform1f(renderer.diameter, diameter);
-    gl.uniform1f(renderer.overNode,
-      graphRenderer.findNearestElements(modelX, modelY, true, false).some(element => element.isNode()) ? 1 : 0);
+    const node = graphRenderer.findNearestElements(modelX, modelY, true, false).find(element => element.isNode());
+    gl.uniform1f(renderer.overNode, node ? 1 : 0);
+    const description = node?.data('description') ?? '';
+    if (status.textContent !== description) status.textContent = description;
+    status.hidden = !description;
     gl.drawArrays(gl.TRIANGLES, 0, 6);
     lens.hidden = false;
   }

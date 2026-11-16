@@ -76,18 +76,23 @@
       background: none; color: inherit; font-size: 20px; cursor: pointer; }
     #fisheye { position: fixed; z-index: 3; pointer-events: none; border-radius: 50%;
       background: #10161e; box-shadow: 0 0 0 2px #9ddcc899, 0 8px 28px #00000080; }
-    #graph[aria-busy="true"] ~ #fisheye { visibility: hidden; }
+    #graph[aria-busy="true"] ~ #fisheye,
+    #graph[aria-busy="true"] ~ #lens-status { visibility: hidden; }
+    #lens-status { position: fixed; z-index: 4; left: 16px; right: 16px;
+      bottom: max(12px, env(safe-area-inset-bottom)); pointer-events: none;
+      font: 13px/1.5 system-ui, sans-serif; color: var(--text); text-shadow: 0 1px 3px #10161e; }
     @media (max-width: 650px) {
       #controls { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px; }
     }
   </style>
   <script src="assets/vendor/cytoscape-3.34.4.min.js"></script>
   <script src="assets/graph-controls.js?v=2dce40708926"></script>
-  <script src="assets/graph-fisheye.js?v=8ec595ceca69"></script>
+  <script src="assets/graph-fisheye.js?v=6dc2278d899c"></script>
 </head>
 <body>
   <main id="graph" tabindex="0" aria-label="Projects" aria-busy="true"></main>
   <canvas id="fisheye" hidden aria-hidden="true"></canvas>
+  <div id="lens-status" role="status" hidden></div>
   <section id="controls" aria-label="Graph appearance and connections" inert>
     <label><select id="color-by" aria-label="Color by"></select></label>
     <label><select id="size-by" aria-label="Size by"></select></label>
@@ -670,7 +675,8 @@
         const label = project.name;
         const representative = inventory.repositories.find(repo => repo.id === project.repository_ids[0]);
         return { position: savedLayout?.positions[project.id],
-          data: { id: project.id, label, url: representative.url, labelWidth: Math.ceil(measure.measureText(label).width),
+          data: { id: project.id, label, description: project.description,
+          url: representative.url, labelWidth: Math.ceil(measure.measureText(label).width),
           width: Math.ceil(measure.measureText(label).width), height: 16, padding: 9,
           color: '#bac5cf', textColor: '#14212a', borderStyle: 'solid', selectionStrength: 0 } };
       });
