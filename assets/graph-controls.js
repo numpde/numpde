@@ -32,15 +32,15 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
   const contextColors = new Map(Object.keys(inventory.work_context_types).map((key, i) => [key, palette[i % palette.length]]));
   const colorModes = {
     none: { label: 'Color by' },
-    domain: { label: 'Primary domain', colors: categoryColors, labelFor: title },
-    context: { label: 'Primary work context', colors: contextColors,
+    domain: { label: 'Primary domain', colors: categoryColors, labelFor: title, fade: 'activity' },
+    context: { label: 'Primary work context', colors: contextColors, fade: 'commits',
       labelFor: key => inventory.work_context_types[key].label },
-    visibility: { label: 'Visibility', colors: new Map([['public', '#91ceb2'], ['private', '#e3b388']]), labelFor: title },
-    commits: { label: 'Personal commits', log: true },
-    activity: { label: 'Last personal activity', date: true },
-    difficulty: { label: 'Contribution difficulty', max: 100,
+    visibility: { label: 'Visibility', colors: new Map([['public', '#91ceb2'], ['private', '#e3b388']]), labelFor: title, fade: 'activity' },
+    commits: { label: 'Personal commits', log: true, fade: 'activity' },
+    activity: { label: 'Last personal activity', date: true, fade: 'commits' },
+    difficulty: { label: 'Contribution difficulty', max: 100, fade: 'commits',
       gradient: [[247, 231, 195], [238, 155, 70]] },
-    connections: { label: 'Visible connections', log: true }
+    connections: { label: 'Visible connections', log: true, fade: 'commits' }
   };
   const sizeModes = {
     none: { label: 'Size by' },
@@ -183,10 +183,29 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
     const [low, high] = mode.gradient ?? [[210, 222, 231], [83, 185, 160]];
     return '#' + low.map((value, i) => Math.round(value + (high[i] - value) * ratio).toString(16).padStart(2, '0')).join('');
   }
+  const background = getComputedStyle(document.documentElement).backgroundColor.match(/[\d.]+/g).slice(0, 3).map(Number);
+  const channels = color => [1, 3, 5].map(offset => parseInt(color.slice(offset, offset + 2), 16));
+  const luminance = rgb => rgb.map(value => {
+    const channel = value / 255;
+    return channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4;
+  }).reduce((sum, value, index) => sum + value * [.2126, .7152, .0722][index], 0);
+  const darkText = '#14212a', lightText = '#d1dce5';
+  const darkLuminance = luminance(channels(darkText)), lightLuminance = luminance(channels(lightText));
+  function fadedAppearance(color, amount) {
+    const rgb = channels(color).map((channel, index) => Math.round(background[index] + (channel - background[index]) * amount));
+    const brightness = luminance(rgb);
+    const darkContrast = (brightness + .05) / (darkLuminance + .05);
+    const lightContrast = (lightLuminance + .05) / (brightness + .05);
+    return {
+      color: '#' + rgb.map(channel => channel.toString(16).padStart(2, '0')).join(''),
+      textColor: darkContrast >= lightContrast ? darkText : lightText
+    };
+  }
   function applyAppearance(render = true) {
     const colorMode = colorModes[colorSelect.value], sizeMode = sizeModes[sizeSelect.value];
     const colorScale = !colorMode.colors && colorSelect.value !== 'none' ? scale(colorMode, colorSelect.value) : null;
     const sizeScale = sizeSelect.value !== 'none' ? scale(sizeMode, sizeSelect.value) : null;
+    const fadeScale = colorMode.fade ? scale(colorModes[colorMode.fade], colorMode.fade) : null;
     cy.batch(() => {
       for (const node of cy.nodes()) {
         const item = info.get(node.id());
@@ -202,7 +221,8 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
         }
         const ratio = sizeScale ? sizeScale.ratio(item[sizeSelect.value]) : 0;
         const size = (ratio ?? 0) * (sizeSelect.value === 'difficulty' ? 2.5 : 1);
-        node.data({ color, width: node.data('labelWidth') + 12 * size,
+        const fade = fadeScale ? .35 + .65 * (fadeScale.ratio(item[colorMode.fade]) ?? 0) : 1;
+        node.data({ ...fadedAppearance(color, fade), width: node.data('labelWidth') + 12 * size,
           height: 16 + 16 * size, padding: sizeScale ? 6 + 8 * size : 9,
           borderStyle: sizeScale && ratio === null ? 'dashed' : 'solid' });
       }
