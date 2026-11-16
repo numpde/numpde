@@ -169,6 +169,12 @@ function attachGraphFisheye({ cy, graph }) {
   }, { passive: true });
   graph.addEventListener('pointerleave', () => { pointer = null; hide(); });
   toggle.addEventListener('click', () => setEnabled(!enabled, true));
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape' || !enabled) return;
+    event.preventDefault();
+    event.stopPropagation();
+    setEnabled(false, true);
+  }, true);
   cy.on('render', schedule);
   addEventListener('resize', schedule);
   addEventListener('popstate', () => setEnabled(new URLSearchParams(location.search).get('fisheye') === '1'));
