@@ -16,6 +16,43 @@ function attachGraphFisheye({ cy, graph }) {
   let sceneVersion = 0;
   const changedStyles = new Set(), styleKeys = new Map();
   let drawing = false;
+  let hullVersion = -1, nodeHull = [];
+
+  function distanceToGraph(x, y) {
+    if (hullVersion !== sceneVersion) {
+      const points = [];
+      for (const node of cy.nodes()) {
+        if (!node.visible()) continue;
+        const b = node.boundingBox();
+        points.push({ x: b.x1, y: b.y1 }, { x: b.x2, y: b.y1 },
+          { x: b.x2, y: b.y2 }, { x: b.x1, y: b.y2 });
+      }
+      points.sort((a, b) => a.x - b.x || a.y - b.y);
+      const turn = (a, b, c) => (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+      const lower = [], upper = [];
+      for (const point of points) {
+        while (lower.length > 1 && turn(lower.at(-2), lower.at(-1), point) <= 0) lower.pop();
+        lower.push(point);
+      }
+      for (let i = points.length - 1; i >= 0; i--) {
+        const point = points[i];
+        while (upper.length > 1 && turn(upper.at(-2), upper.at(-1), point) <= 0) upper.pop();
+        upper.push(point);
+      }
+      nodeHull = lower.slice(0, -1).concat(upper.slice(0, -1));
+      hullVersion = sceneVersion;
+    }
+    let inside = nodeHull.length > 2, nearest = Infinity;
+    for (let i = 0; i < nodeHull.length; i++) {
+      const a = nodeHull[i], b = nodeHull[(i + 1) % nodeHull.length];
+      const dx = b.x - a.x, dy = b.y - a.y;
+      if (dx * (y - a.y) - dy * (x - a.x) < 0) inside = false;
+      const lengthSquared = dx * dx + dy * dy;
+      const t = lengthSquared ? Math.max(0, Math.min(1, ((x - a.x) * dx + (y - a.y) * dy) / lengthSquared)) : 0;
+      nearest = Math.min(nearest, Math.hypot(x - a.x - t * dx, y - a.y - t * dy));
+    }
+    return inside ? 0 : nearest;
+  }
 
   function fixedGeometry() {
     return { x: innerWidth / 2, y: innerHeight / 2, radius: Math.min(innerWidth, innerHeight) * .4 };
@@ -187,6 +224,15 @@ function attachGraphFisheye({ cy, graph }) {
     const focus = fixed ?? pointer;
     const radius = fixed ? fixed.radius : Math.min(200, innerWidth * .42, innerHeight * .42);
     const diameter = radius * 2, pixelRatio = devicePixelRatio || 1;
+    const bounds = graph.getBoundingClientRect(), pan = cy.pan(), zoom = cy.zoom();
+    const modelX = (focus.x - bounds.left - pan.x) / zoom;
+    const modelY = (focus.y - bounds.top - pan.y) / zoom;
+    const distance = distanceToGraph(modelX, modelY) * zoom / radius;
+    const displayedDistance = (1 - Math.exp(-distortion * distance)) / (1 - Math.exp(-distortion));
+    // A boundary half a radius from the center leaves only a ~20% circle cap.
+    // Use the nodes' hull so gaps within a sparse graph don't dismiss the lens.
+    // A small reentry margin prevents flicker along that boundary.
+    if (displayedDistance > (lens.hidden ? .46 : .5)) return hide();
     const size = Math.ceil(diameter * pixelRatio);
     if (lens.width !== size || lens.height !== size) { lens.width = size; lens.height = size; }
     lens.style.width = lens.style.height = diameter + 'px';
@@ -197,9 +243,8 @@ function attachGraphFisheye({ cy, graph }) {
     }
     lens.style.left = x - radius + 'px'; lens.style.top = y - radius + 'px';
     const scale = Math.min(pixelRatio * peakZoom, (renderer.atlasSize - 2 * renderer.tileSize) / diameter);
-    const bounds = graph.getBoundingClientRect(), pan = cy.pan();
     updateTiles(graphRenderer, (focus.x - bounds.left - pan.x) * scale,
-      (focus.y - bounds.top - pan.y) * scale, radius, scale, cy.zoom() * scale);
+      (focus.y - bounds.top - pan.y) * scale, radius, scale, zoom * scale);
     const { gl } = renderer;
     gl.viewport(0, 0, size, size);
     gl.clear(gl.COLOR_BUFFER_BIT);
