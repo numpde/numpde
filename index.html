@@ -702,7 +702,7 @@
             'text-halign': 'center', 'text-wrap': 'none', color: 'data(textColor)',
             'background-color': 'data(color)', 'border-style': 'data(borderStyle)',
             'border-color': 'mapData(selectionStrength, 0, 1, #4d6170, #9fe4cf)',
-            'border-opacity': 'data(selectionStrength)',
+            'border-opacity': 'mapData(selectionStrength, 0, 1, 0.2, 1)',
             'border-width': 2.5 * nodeDisplayScale, 'overlay-opacity': 0
           } },
           { selector: 'node.physics-size', style: {
