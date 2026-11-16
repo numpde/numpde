@@ -1,7 +1,7 @@
 /* A focus-and-context lens: redraw and distort pixels, never graph positions.
  * https://bost.ocks.org/mike/fisheye/
  */
-function attachGraphFisheye({ cy, graph, inventory }) {
+function attachGraphFisheye({ cy, graph, inventory, selectionPulse }) {
   const toggle = document.getElementById('fisheye-toggle');
   const lens = document.getElementById('fisheye');
   const status = document.getElementById('lens-status');
@@ -126,6 +126,10 @@ function attachGraphFisheye({ cy, graph, inventory }) {
       uniform float reach;
       uniform float diameter;
       uniform float overNode;
+      uniform sampler2D selectionImage;
+      uniform float pulseGain;
+      uniform vec2 pulseFocus;
+      uniform vec2 pulseReach;
       varying ${precision} vec2 uv;
       void main() {
         vec2 offset = uv * 2.0 - 1.0;
@@ -136,6 +140,13 @@ function attachGraphFisheye({ cy, graph, inventory }) {
         float sourceRadius = -log(1.0 - radius * (1.0 - exp(-distortion))) / distortion;
         vec2 sampleOffset = radius > 0.00001 ? offset * sourceRadius / radius : vec2(0.0);
         gl_FragColor = texture2D(graphImage, focus + sampleOffset * reach);
+        if (pulseGain > 0.0) {
+          vec2 point = pulseFocus + sampleOffset * pulseReach;
+          if (all(greaterThanEqual(point, vec2(0.0))) && all(lessThanEqual(point, vec2(1.0)))) {
+            vec4 glow = texture2D(selectionImage, point);
+            gl_FragColor.rgb = gl_FragColor.rgb * (1.0 - glow.a * pulseGain) + glow.rgb * pulseGain;
+          }
+        }
         // Fine rounded arms leave the focal point unobstructed.
         vec2 p = abs((uv - 0.5) * diameter);
         float horizontal = length(vec2(p.x - clamp(p.x, 4.0, 8.0), p.y));
@@ -166,17 +177,22 @@ function attachGraphFisheye({ cy, graph, inventory }) {
     const position = gl.getAttribLocation(program, 'position');
     gl.enableVertexAttribArray(position);
     gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
-    const atlasTexture = gl.createTexture(), previewTexture = gl.createTexture();
-    for (const [texture, wrap] of [[atlasTexture, gl.REPEAT], [previewTexture, gl.CLAMP_TO_EDGE]]) {
+    const atlasTexture = gl.createTexture(), previewTexture = gl.createTexture(), pulseTexture = gl.createTexture();
+    for (const [texture, wrap] of [[atlasTexture, gl.REPEAT], [previewTexture, gl.CLAMP_TO_EDGE], [pulseTexture, gl.CLAMP_TO_EDGE]]) {
       gl.bindTexture(gl.TEXTURE_2D, texture);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap);
     }
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, pulseTexture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(4));
+    gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, atlasTexture);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.uniform1i(gl.getUniformLocation(program, 'graphImage'), 0);
+    gl.uniform1i(gl.getUniformLocation(program, 'selectionImage'), 1);
     gl.uniform1f(gl.getUniformLocation(program, 'distortion'), distortion);
     // A repeating, world-aligned tile atlas keeps pointer movement from
     // redrawing and uploading the whole high-resolution lens image.
@@ -184,10 +200,36 @@ function attachGraphFisheye({ cy, graph, inventory }) {
     const tileSize = atlasSize / 16;
     source.width = source.height = tileSize;
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, atlasSize, atlasSize, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-    return { gl, atlasTexture, previewTexture, previewFrame: null, previewSize: 0, atlasSize, tileSize,
+    return { gl, atlasTexture, previewTexture, pulseTexture, pulseVersion: -1, pulseWidth: 1, pulseHeight: 1,
+      previewFrame: null, previewSize: 0, atlasSize, tileSize,
       tiles: new Map(), bounds: new Map(), version: -1, geometryVersion: -1, modelScale: null, complete: false,
       focus: gl.getUniformLocation(program, 'focus'), reach: gl.getUniformLocation(program, 'reach'),
-      diameter: gl.getUniformLocation(program, 'diameter'), overNode: gl.getUniformLocation(program, 'overNode') };
+      diameter: gl.getUniformLocation(program, 'diameter'), overNode: gl.getUniformLocation(program, 'overNode'),
+      pulseGain: gl.getUniformLocation(program, 'pulseGain'), pulseFocus: gl.getUniformLocation(program, 'pulseFocus'),
+      pulseReach: gl.getUniformLocation(program, 'pulseReach') };
+  }
+
+  function updatePulse(modelX, modelY, radius, zoom) {
+    const { gl } = renderer, pulse = selectionPulse.frame();
+    gl.uniform1f(renderer.pulseGain, pulse?.gain ?? 0);
+    if (!pulse) return;
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, renderer.pulseTexture);
+    if (renderer.pulseVersion !== pulse.version) {
+      const image = pulse.canvas;
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+      if (renderer.pulseWidth !== image.width || renderer.pulseHeight !== image.height) {
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        renderer.pulseWidth = image.width; renderer.pulseHeight = image.height;
+      } else gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, gl.RGBA, gl.UNSIGNED_BYTE, image);
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+      renderer.pulseVersion = pulse.version;
+    }
+    gl.activeTexture(gl.TEXTURE0);
+    gl.uniform2f(renderer.pulseFocus, (modelX * pulse.zoom + pulse.pan.x) / pulse.width,
+      1 - (modelY * pulse.zoom + pulse.pan.y) / pulse.height);
+    gl.uniform2f(renderer.pulseReach, radius / zoom * pulse.zoom / pulse.width,
+      radius / zoom * pulse.zoom / pulse.height);
   }
 
   function updateTiles(graphRenderer, focusX, focusY, radius, scale, modelScale) {
@@ -387,6 +429,7 @@ function attachGraphFisheye({ cy, graph, inventory }) {
       drawPreview(graphRenderer, modelX, modelY, radius, zoom, size);
     }
     if (!interactive && !renderer.complete) schedule();
+    updatePulse(modelX, modelY, radius, zoom);
     const { gl } = renderer;
     gl.viewport(0, 0, size, size);
     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -504,6 +547,7 @@ function attachGraphFisheye({ cy, graph, inventory }) {
   lens.addEventListener('webglcontextrestored', () => { toggle.disabled = false; });
   setEnabled(new URLSearchParams(location.search).get('fisheye') !== '0');
   return {
+    refresh() { if (enabled && !document.hidden && (mobileLens() || pointer)) schedule(); },
     nodeAt(renderedPosition, originalNode) {
       if (!enabled || !mobileLens() || lens.hidden || !renderedPosition) return originalNode;
       const bounds = graph.getBoundingClientRect(), fixed = fixedGeometry();
