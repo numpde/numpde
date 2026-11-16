@@ -5,7 +5,7 @@ function attachGraphFisheye({ cy, graph }) {
   const toggle = document.getElementById('fisheye-toggle');
   const lens = document.getElementById('fisheye');
   const source = document.createElement('canvas');
-  const sourceContext = source.getContext('2d');
+  const sourceContext = source.getContext('2d', { alpha: false });
   const background = getComputedStyle(document.documentElement).backgroundColor;
   const distortion = 4;
   const peakZoom = distortion / (1 - Math.exp(-distortion));
@@ -13,6 +13,9 @@ function attachGraphFisheye({ cy, graph }) {
   const touches = new Set();
   let enabled = false, pointer = null, frame = null, renderer = null;
   let panThroughNodes = null;
+  let sceneVersion = 0;
+  const changedStyles = new Set(), styleKeys = new Map();
+  let drawing = false;
 
   function fixedGeometry() {
     return { x: innerWidth / 2, y: innerHeight / 2, radius: Math.min(innerWidth, innerHeight) * .4 };
@@ -54,6 +57,8 @@ function attachGraphFisheye({ cy, graph }) {
       precision ${precision} float;
       uniform sampler2D graphImage;
       uniform float distortion;
+      uniform vec2 focus;
+      uniform float reach;
       varying ${precision} vec2 uv;
       void main() {
         vec2 offset = uv * 2.0 - 1.0;
@@ -63,7 +68,7 @@ function attachGraphFisheye({ cy, graph }) {
         // and its center magnification is D / (1 - exp(-D)).
         float sourceRadius = -log(1.0 - radius * (1.0 - exp(-distortion))) / distortion;
         vec2 sampleOffset = radius > 0.00001 ? offset * sourceRadius / radius : vec2(0.0);
-        gl_FragColor = texture2D(graphImage, sampleOffset * 0.5 + 0.5);
+        gl_FragColor = texture2D(graphImage, focus + sampleOffset * reach);
       }
     `);
     gl.compileShader(fragment);
@@ -87,12 +92,57 @@ function attachGraphFisheye({ cy, graph }) {
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.uniform1i(gl.getUniformLocation(program, 'graphImage'), 0);
     gl.uniform1f(gl.getUniformLocation(program, 'distortion'), distortion);
-    return { gl, maxTextureSize: gl.getParameter(gl.MAX_TEXTURE_SIZE) };
+    // A repeating, world-aligned tile atlas keeps pointer movement from
+    // redrawing and uploading the whole high-resolution lens image.
+    const atlasSize = Math.min(4096, 2 ** Math.floor(Math.log2(gl.getParameter(gl.MAX_TEXTURE_SIZE))));
+    const tileSize = atlasSize / 16;
+    source.width = source.height = tileSize;
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, atlasSize, atlasSize, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    return { gl, atlasSize, tileSize, tiles: new Map(), version: -1, modelScale: null,
+      focus: gl.getUniformLocation(program, 'focus'), reach: gl.getUniformLocation(program, 'reach') };
+  }
+
+  function updateTiles(graphRenderer, focusX, focusY, radius, scale, modelScale) {
+    const { gl, atlasSize, tileSize, tiles } = renderer;
+    if (renderer.version !== sceneVersion || renderer.modelScale !== modelScale) {
+      tiles.clear();
+      renderer.version = sceneVersion;
+      renderer.modelScale = modelScale;
+    }
+    const wrap = value => ((value % 16) + 16) % 16;
+    // Include a pixel beyond the circle for bilinear sampling at tile edges.
+    const reach = radius * scale + 1;
+    const firstX = Math.floor((focusX - reach) / tileSize), lastX = Math.floor((focusX + reach) / tileSize);
+    const firstY = Math.floor((focusY - reach) / tileSize), lastY = Math.floor((focusY + reach) / tileSize);
+    let elements;
+    for (let ty = firstY; ty <= lastY; ty++) for (let tx = firstX; tx <= lastX; tx++) {
+      const slotX = wrap(tx), slotY = wrap(-ty - 1), slot = slotY * 16 + slotX;
+      const previous = tiles.get(slot);
+      if (previous && previous.x === tx && previous.y === ty) continue;
+      if (!elements) elements = graphRenderer.getCachedZSortedEles().map(element => ({ element, bounds: element.boundingBox() }));
+      const extent = { x1: (tx * tileSize - 1) / modelScale, y1: (ty * tileSize - 1) / modelScale,
+        x2: ((tx + 1) * tileSize + 1) / modelScale, y2: ((ty + 1) * tileSize + 1) / modelScale };
+      sourceContext.setTransform(1, 0, 0, 1, 0, 0);
+      sourceContext.fillStyle = background;
+      sourceContext.fillRect(0, 0, tileSize, tileSize);
+      sourceContext.save();
+      sourceContext.setTransform(modelScale, 0, 0, modelScale, -tx * tileSize, -ty * tileSize);
+      // The vector export path retains sharp text at the lens's peak zoom.
+      graphRenderer.drawElements(sourceContext, elements.filter(({ bounds: b }) =>
+        b.x1 <= extent.x2 && b.x2 >= extent.x1 && b.y1 <= extent.y2 && b.y2 >= extent.y1
+      ).map(({ element }) => element));
+      sourceContext.restore();
+      gl.texSubImage2D(gl.TEXTURE_2D, 0, slotX * tileSize, slotY * tileSize, gl.RGBA, gl.UNSIGNED_BYTE, source);
+      tiles.set(slot, { x: tx, y: ty });
+    }
+    const fraction = value => ((value / atlasSize) % 1 + 1) % 1;
+    gl.uniform2f(renderer.focus, fraction(focusX), fraction(-focusY));
+    gl.uniform1f(renderer.reach, radius * scale / atlasSize);
   }
 
   function hide() {
@@ -112,10 +162,27 @@ function attachGraphFisheye({ cy, graph }) {
   function draw() {
     frame = null;
     if (!enabled || (!mobileLens() && !pointer) || document.hidden || graph.getAttribute('aria-busy') === 'true') return hide();
+    drawing = true;
+    try {
+      paint();
+    } finally {
+      drawing = false;
+    }
+  }
+
+  function paint() {
     const graphRenderer = cy.renderer();
     // Forces may update positions between the main render and this callback.
     // Bring cached label and edge projections up to the same frame first.
     graphRenderer.flushRenderedStyleQueue();
+    // Cytoscape also emits style events while painting unchanged backgrounds.
+    // Only changes to the computed style should discard the image tiles.
+    for (const element of changedStyles) {
+      const key = element._private.styleKey;
+      if (styleKeys.get(element) !== key) sceneVersion++;
+      styleKeys.set(element, key);
+    }
+    changedStyles.clear();
     const fixed = mobileLens() ? fixedGeometry() : null;
     const focus = fixed ?? pointer;
     const radius = fixed ? fixed.radius : Math.min(200, innerWidth * .42, innerHeight * .42);
@@ -129,25 +196,13 @@ function attachGraphFisheye({ cy, graph }) {
       y = Math.max(radius + 8, Math.min(innerHeight - radius - 8, y - radius - 32));
     }
     lens.style.left = x - radius + 'px'; lens.style.top = y - radius + 'px';
-    const sourceSize = Math.min(renderer.maxTextureSize, Math.ceil(diameter * pixelRatio * peakZoom));
-    if (source.width !== sourceSize || source.height !== sourceSize) { source.width = sourceSize; source.height = sourceSize; }
-    const scale = sourceSize / diameter;
-    sourceContext.setTransform(1, 0, 0, 1, 0, 0);
-    sourceContext.fillStyle = background;
-    sourceContext.fillRect(0, 0, sourceSize, sourceSize);
+    const scale = Math.min(pixelRatio * peakZoom, (renderer.atlasSize - 2 * renderer.tileSize) / diameter);
     const bounds = graph.getBoundingClientRect(), pan = cy.pan();
-    // Use the pinned renderer's vector export path. renderTo() reuses viewport
-    // textures, so a larger canvas still magnifies cached low-resolution text.
-    sourceContext.save();
-    sourceContext.translate((radius + pan.x - (focus.x - bounds.left)) * scale,
-      (radius + pan.y - (focus.y - bounds.top)) * scale);
-    sourceContext.scale(cy.zoom() * scale, cy.zoom() * scale);
-    graphRenderer.drawElements(sourceContext, graphRenderer.getCachedZSortedEles());
-    sourceContext.restore();
+    updateTiles(graphRenderer, (focus.x - bounds.left - pan.x) * scale,
+      (focus.y - bounds.top - pan.y) * scale, radius, scale, cy.zoom() * scale);
     const { gl } = renderer;
     gl.viewport(0, 0, size, size);
     gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
     lens.hidden = false;
   }
@@ -204,6 +259,15 @@ function attachGraphFisheye({ cy, graph }) {
     setEnabled(false, true);
   }, true);
   cy.on('render', schedule);
+  cy.on('position add remove', event => {
+    sceneVersion++;
+    if (event.type === 'remove') { styleKeys.delete(event.target); changedStyles.delete(event.target); }
+    schedule();
+  });
+  cy.on('style', event => {
+    changedStyles.add(event.target);
+    if (!drawing) schedule();
+  });
   addEventListener('resize', schedule);
   fixedLens.addEventListener('change', () => { pointer = null; syncGestures(); schedule(); });
   addEventListener('popstate', () => setEnabled(new URLSearchParams(location.search).get('fisheye') === '1'));
