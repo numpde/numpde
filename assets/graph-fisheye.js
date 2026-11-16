@@ -97,6 +97,7 @@ function attachGraphFisheye({ cy, graph }) {
       uniform vec2 focus;
       uniform float reach;
       uniform float diameter;
+      uniform float overNode;
       varying ${precision} vec2 uv;
       void main() {
         vec2 offset = uv * 2.0 - 1.0;
@@ -111,7 +112,9 @@ function attachGraphFisheye({ cy, graph }) {
         vec2 p = abs((uv - 0.5) * diameter);
         float horizontal = length(vec2(p.x - clamp(p.x, 4.0, 8.0), p.y));
         float vertical = length(vec2(p.y - clamp(p.y, 4.0, 8.0), p.x));
-        float hair = min(horizontal, vertical) - 0.5;
+        float arms = min(horizontal, vertical) - 0.5;
+        float ring = abs(length(p) - 4.5) - 0.6;
+        float hair = mix(arms, ring, overNode);
         gl_FragColor = mix(gl_FragColor, vec4(0.04, 0.07, 0.09, 1.0),
           0.65 * (1.0 - smoothstep(0.25, 1.0, hair)));
         gl_FragColor = mix(gl_FragColor, vec4(0.7, 0.9, 0.83, 1.0),
@@ -152,7 +155,7 @@ function attachGraphFisheye({ cy, graph }) {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, atlasSize, atlasSize, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
     return { gl, atlasSize, tileSize, tiles: new Map(), version: -1, modelScale: null,
       focus: gl.getUniformLocation(program, 'focus'), reach: gl.getUniformLocation(program, 'reach'),
-      diameter: gl.getUniformLocation(program, 'diameter') };
+      diameter: gl.getUniformLocation(program, 'diameter'), overNode: gl.getUniformLocation(program, 'overNode') };
   }
 
   function updateTiles(graphRenderer, focusX, focusY, radius, scale, modelScale) {
@@ -260,6 +263,8 @@ function attachGraphFisheye({ cy, graph }) {
     gl.viewport(0, 0, size, size);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.uniform1f(renderer.diameter, diameter);
+    gl.uniform1f(renderer.overNode,
+      graphRenderer.findNearestElements(modelX, modelY, true, false).some(element => element.isNode()) ? 1 : 0);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
     lens.hidden = false;
   }
