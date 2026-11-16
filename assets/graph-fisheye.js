@@ -7,7 +7,7 @@ function attachGraphFisheye({ cy, graph }) {
   const source = document.createElement('canvas');
   const sourceContext = source.getContext('2d');
   const background = getComputedStyle(document.documentElement).backgroundColor;
-  const distortion = 2.5;
+  const distortion = 4;
   const peakZoom = distortion / (1 - Math.exp(-distortion));
   const touches = new Set();
   let enabled = false, pointer = null, frame = null, renderer = null;
@@ -90,7 +90,7 @@ function attachGraphFisheye({ cy, graph }) {
   function draw() {
     frame = null;
     if (!enabled || !pointer || document.hidden || graph.getAttribute('aria-busy') === 'true') return hide();
-    const radius = Math.min(140, innerWidth * .35, innerHeight * .35);
+    const radius = Math.min(200, innerWidth * .42, innerHeight * .42);
     const diameter = radius * 2, pixelRatio = devicePixelRatio || 1;
     const size = Math.ceil(diameter * pixelRatio);
     if (lens.width !== size || lens.height !== size) { lens.width = size; lens.height = size; }
