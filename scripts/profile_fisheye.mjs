@@ -63,8 +63,8 @@ async function profile() {
     let mainMs = 0;
     if (paintMain) {
       const start = performance.now();
-      renderer.flushRenderedStyleQueue();
       renderer.redrawHint('eles', true);
+      for (const { fn } of renderer.beforeRenderCallbacks) fn(true, performance.now());
       renderer.render();
       mainMs = performance.now() - start;
     }

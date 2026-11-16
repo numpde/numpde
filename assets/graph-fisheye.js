@@ -28,27 +28,11 @@ function attachGraphFisheye({ cy, graph, inventory }) {
   let hullVersion = -1, nodeHull = [];
   let lastMotion = -Infinity, refineTimer = null;
   let renderedCamera = { zoom: cy.zoom(), pan: { ...cy.pan() }, version: 0 };
-  let mainQuality = null;
-
-  function liveMainResolution() {
-    const graphRenderer = cy.renderer();
-    if (mainQuality || graphRenderer.getPixelRatio() <= 1) return;
-    mainQuality = { renderer: graphRenderer, ratio: graphRenderer.forcedPixelRatio };
-    graphRenderer.forcedPixelRatio = 1;
-    graphRenderer.redraw();
-  }
-
-  function restoreMainResolution() {
-    if (!mainQuality) return;
-    const { renderer: graphRenderer, ratio } = mainQuality;
-    mainQuality = null;
-    graphRenderer.forcedPixelRatio = ratio;
-    graphRenderer.redraw();
-  }
 
   function motion() {
     lastMotion = performance.now();
-    if (enabled && refineTimer === null) refineTimer = setTimeout(refine, 160);
+    if (!enabled) return;
+    if (refineTimer === null) refineTimer = setTimeout(refine, 160);
     schedule();
   }
 
@@ -313,7 +297,6 @@ function attachGraphFisheye({ cy, graph, inventory }) {
 
   function hide() {
     lens.hidden = true;
-    restoreMainResolution();
     if (!enabled || document.hidden || graph.getAttribute('aria-busy') === 'true') {
       clearTimeout(refineTimer); refineTimer = null;
       status.hidden = true;
@@ -376,8 +359,6 @@ function attachGraphFisheye({ cy, graph, inventory }) {
     // Use the nodes' hull so gaps within a sparse graph don't dismiss the lens.
     // A small reentry margin prevents flicker along that boundary.
     if (displayedDistance > (lens.hidden ? .46 : .5)) return hide();
-    if (interactive) liveMainResolution();
-    else restoreMainResolution();
     const size = Math.ceil(diameter * pixelRatio);
     if (lens.width !== size || lens.height !== size) { lens.width = size; lens.height = size; }
     lens.style.width = lens.style.height = diameter + 'px';
@@ -485,7 +466,7 @@ function attachGraphFisheye({ cy, graph, inventory }) {
   }, true);
   cy.on('render', () => {
     renderedCamera = { zoom: cy.zoom(), pan: { ...cy.pan() }, version: renderedCamera.version + 1 };
-    schedule();
+    if (enabled) schedule();
   });
   cy.on('position add remove', event => {
     const node = event.target;
@@ -502,12 +483,12 @@ function attachGraphFisheye({ cy, graph, inventory }) {
     if (event.type === 'remove' && renderer) renderer.bounds.delete(event.target);
     if (event.type === 'remove') { styleKeys.delete(event.target); changedStyles.delete(event.target); }
     if (event.type === 'position') motion();
-    else schedule();
+    else if (enabled) schedule();
   });
   cy.on('zoom', motion);
   cy.on('style', event => {
     changedStyles.add(event.target);
-    if (!drawing) schedule();
+    if (enabled && !drawing) schedule();
   });
   addEventListener('resize', schedule);
   fixedLens.addEventListener('change', () => { pointer = null; syncGestures(); schedule(); });

@@ -93,7 +93,7 @@
   </style>
   <script src="assets/vendor/cytoscape-3.34.4.min.js"></script>
   <script src="assets/graph-controls.js?v=dcf15a4173ad"></script>
-  <script src="assets/graph-fisheye.js?v=d64cd5ee7dba"></script>
+  <script src="assets/graph-fisheye.js?v=ee52867d8851"></script>
 </head>
 <body>
   <main id="graph" tabindex="0" aria-label="Projects" aria-busy="true"></main>
@@ -120,6 +120,7 @@
     const graph = document.getElementById('graph');
     const nodeDisplayScale = 2;
     const nodeLabelScale = 1.4;
+    const physicsBorderWidth = 2.5;
     let cy = null;
     let arrangement = null;
     let selected = null;
@@ -128,6 +129,7 @@
     let positioningBubble = false;
     let liveFrame = null;
     let liveActive = false;
+    let layoutPreview = false;
     let initialMotion = false;
     let neighborhoodMap = null;
     let layoutAnchors = null;
@@ -227,6 +229,10 @@
       liveNeighborhood = null;
       liveSourceId = null;
       initialMotion = false;
+      if (layoutPreview) {
+        layoutPreview = false;
+        cy.edges().removeClass('layout-preview');
+      }
     }
 
     // Adapted from best-practices.html: Cytoscape owns a grabbed node, while
@@ -245,18 +251,21 @@
       }
       liveActive = true;
       if (document.hidden || liveFrame !== null) return;
+      layoutPreview = true;
+      cy.edges().addClass('layout-preview');
       const stepsPerFrame = matchMedia('(prefers-reduced-motion: reduce)').matches ? 24 : 12;
       // Measure the original geometry; larger rendering must not alter forces.
-      cy.nodes().addClass('physics-size');
       const bodies = cy.nodes(':visible').map(node => {
-        const bounds = node.boundingBox({ includeOverlays: false });
+        const position = node.position(), padding = node.data('padding');
+        // The pinned renderer adds one bounding-box unit on each side.
+        const extra = 2 * padding + physicsBorderWidth + 2;
         return {
           node, degree: 0,
-          halfWidth: bounds.w / 2, halfHeight: bounds.h / 2,
-          x: 0, y: 0, vx: 0, vy: 0, previousX: 0, previousY: 0
+          halfWidth: (node.data('width') + extra) / 2, halfHeight: (node.data('height') + extra) / 2,
+          x: position.x, y: position.y, publishedX: position.x, publishedY: position.y,
+          vx: 0, vy: 0, previousX: 0, previousY: 0
         };
       });
-      cy.nodes().removeClass('physics-size');
       const byId = new Map(bodies.map(body => [body.node.id(), body]));
       const center = bodies.reduce((point, body) => {
         const position = body.node.position();
@@ -279,23 +288,29 @@
         // d3-force also reduces spring strength around highly connected nodes.
         link.strength = .04 / Math.min(link.a.degree, link.b.degree);
       }
-      let previousTime = null;
       let quietSteps = 0;
-      const tick = time => {
-        const step = previousTime === null ? 1 : Math.min(2, (time - previousTime) / 16.67);
-        previousTime = time;
+      const tick = () => {
+        const deadline = performance.now() + 6;
         for (const body of bodies) {
           const position = body.node.position();
-          body.x = position.x;
-          body.y = position.y;
+          // External dragging and keyboard movement override the simulation;
+          // unpublished subpixel motion continues accumulating internally.
+          if (position.x !== body.publishedX || position.y !== body.publishedY) {
+            body.x = body.publishedX = position.x;
+            body.y = body.publishedY = position.y;
+          }
           body.fixed = body.node.grabbed() || body.node.locked()
             || (liveNeighborhood !== null && !liveNeighborhood.has(body.node.id()));
+          if (body.fixed) {
+            body.x = body.publishedX = position.x;
+            body.y = body.publishedY = position.y;
+          }
         }
         const dragging = bodies.some(body => body.node.grabbed());
         const local = liveNeighborhood !== null;
         // Local interaction permits rotation and repacking while distant nodes
         // stay fixed, unless direct contact needs to make room around them.
-        for (let iteration = 0; iteration < Math.ceil(stepsPerFrame * step); iteration++) {
+        for (let iteration = 0; iteration < stepsPerFrame; iteration++) {
           for (const body of bodies) {
             body.previousX = body.x;
             body.previousY = body.y;
@@ -310,10 +325,10 @@
                 const angle = (i * bodies.length + j) * 2.399963229728653;
                 dx = Math.cos(angle); dy = Math.sin(angle);
               }
-              const distance = Math.hypot(dx, dy);
-              const gap = Math.hypot(
-                Math.max(0, Math.abs(dx) - a.halfWidth - b.halfWidth),
-                Math.max(0, Math.abs(dy) - a.halfHeight - b.halfHeight));
+              const distance = Math.sqrt(dx * dx + dy * dy);
+              const gapX = Math.max(0, Math.abs(dx) - a.halfWidth - b.halfWidth);
+              const gapY = Math.max(0, Math.abs(dy) - a.halfHeight - b.halfHeight);
+              const gap = Math.sqrt(gapX * gapX + gapY * gapY);
               // Unbounded 1/d repulsion separates neighborhoods at every scale;
               // softened surface pressure supplies extra room around labels.
               const force = 120 / Math.max(40, distance) + 3 / (1 + gap / 80) ** 2;
@@ -325,7 +340,7 @@
           for (const { a, b, length, strength } of links) {
             let dx = b.x - a.x, dy = b.y - a.y;
             if (dx === 0 && dy === 0) { dx = 1; dy = 1; }
-            const distance = Math.hypot(dx, dy);
+            const distance = Math.sqrt(dx * dx + dy * dy);
             const ux = Math.abs(dx) / distance, uy = Math.abs(dy) / distance;
             // Measure the gap between rectangle boundaries along the edge.
             const clearance = Math.min(a.halfWidth / ux, a.halfHeight / uy)
@@ -350,7 +365,7 @@
             // tethering individual nodes to a packed arrangement.
             body.vx = (body.vx + (center.x - body.x) * .001 + anchorX) * .78;
             body.vy = (body.vy + (center.y - body.y) * .001 + anchorY) * .78;
-            const limit = Math.min(1, 1 / (Math.hypot(body.vx, body.vy) || 1));
+            const limit = Math.min(1, 1 / (Math.sqrt(body.vx * body.vx + body.vy * body.vy) || 1));
             body.vx *= limit; body.vy *= limit;
           }
           // Blend corrections into predicted velocities instead of snapping
@@ -384,7 +399,7 @@
                   const angle = (i * bodies.length + j) * 2.399963229728653;
                   dx = Math.cos(angle); dy = Math.sin(angle);
                 }
-                const distance = Math.hypot(dx, dy), ux = dx / distance, uy = dy / distance;
+                const distance = Math.sqrt(dx * dx + dy * dy), ux = dx / distance, uy = dy / distance;
                 const clearance = Math.min((a.halfWidth + b.halfWidth + 24) / Math.abs(ux),
                   (a.halfHeight + b.halfHeight + 24) / Math.abs(uy));
                 // Correct along the line between centers, avoiding horizontal
@@ -395,15 +410,25 @@
               }
             }
           }
+          let movementSquared = 0;
           for (const body of bodies) {
             if (body.fixed) continue;
             body.x += body.vx; body.y += body.vy;
+            const dx = body.x - body.previousX, dy = body.y - body.previousY;
+            movementSquared = Math.max(movementSquared, dx * dx + dy * dy);
           }
-          const movement = Math.max(...bodies.map(body => Math.hypot(body.x - body.previousX, body.y - body.previousY)));
-          quietSteps = !dragging && movement < .1 && overlap < .5 ? quietSteps + 1 : 0;
+          quietSteps = !dragging && movementSquared < .01 && overlap < .5 ? quietSteps + 1 : 0;
+          if (quietSteps >= 12 || performance.now() >= deadline) break;
         }
-        cy.batch(() => bodies.forEach(body => {
-          if (!body.fixed) body.node.position({ x: body.x, y: body.y });
+        const settled = quietSteps >= 12, thresholdSquared = (.15 / cy.zoom()) ** 2;
+        const updated = bodies.filter(body => {
+          if (body.fixed) return false;
+          const dx = body.x - body.publishedX, dy = body.y - body.publishedY;
+          return settled ? dx !== 0 || dy !== 0 : dx * dx + dy * dy >= thresholdSquared;
+        });
+        if (updated.length) cy.batch(() => updated.forEach(body => {
+          body.node.position({ x: body.x, y: body.y });
+          body.publishedX = body.x; body.publishedY = body.y;
         }));
         if (quietSteps >= 12) {
           // The relaxed positions become the reference for the next interaction.
@@ -703,11 +728,11 @@
             'background-color': 'data(color)', 'border-style': 'data(borderStyle)',
             'border-color': 'mapData(selectionStrength, 0, 1, #4d6170, #9fe4cf)',
             'border-opacity': 'mapData(selectionStrength, 0, 1, 0.2, 1)',
-            'border-width': 2.5 * nodeDisplayScale, 'overlay-opacity': 0
+            'border-width': physicsBorderWidth * nodeDisplayScale, 'overlay-opacity': 0
           } },
           { selector: 'node.physics-size', style: {
             width: 'data(width)', height: 'data(height)', padding: 'data(padding)',
-            'font-size': 13, 'border-width': 2.5
+            'font-size': 13, 'border-width': physicsBorderWidth
           } },
           { selector: 'edge', style: {
             events: 'no', 'overlay-opacity': 0,
@@ -716,6 +741,7 @@
             'target-arrow-color': '#8299a8', 'arrow-scale': .7, label: ''
           } },
           { selector: 'edge[?directed]', style: { 'target-arrow-shape': 'triangle' } },
+          { selector: 'edge.layout-preview', style: { 'curve-style': 'straight' } },
           { selector: 'edge.filtered-out', style: { display: 'none' } }
         ]
       });
