@@ -13,6 +13,8 @@
     html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
     #graph { position: fixed; inset: 0; touch-action: none; outline: none; }
     #graph[aria-busy="true"] { visibility: hidden; }
+    #graph:has(+ #fisheye:not([hidden])),
+    #graph:has(+ #fisheye:not([hidden])) canvas { cursor: none !important; }
     #graph:focus-visible { box-shadow: inset 0 0 0 2px var(--accent); }
     #views { position: fixed; z-index: 10; top: 12px; right: 12px; display: flex; gap: 4px; }
     #views a, #views button { display: grid; place-items: center; width: 44px; height: 44px;
@@ -694,8 +696,7 @@
         ]
       });
       cy.on('tap', 'node', event => {
-        if (selected === event.target) window.open(event.target.data('url'), '_blank', 'noopener,noreferrer');
-        else selectNode(event.target);
+        if (selected !== event.target || document.getElementById('node-info').hidden) selectNode(event.target);
         graph.focus({ preventScroll: true });
       });
       cy.on('position', 'node', event => { if (selected === event.target) positionNodeInfo(); });

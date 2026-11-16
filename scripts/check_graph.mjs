@@ -297,7 +297,7 @@ try{
  assert.equal(await evaluate('openedRepositories.length'),0,'First click must select without opening a tab.');
  await call('Input.dispatchMouseEvent',{type:'mousePressed',button:'left',clickCount:1,...settledPoint});
  await call('Input.dispatchMouseEvent',{type:'mouseReleased',button:'left',clickCount:1,...settledPoint});
- assert.deepEqual(await evaluate('openedRepositories'),[{url:'https://github.com/numpde/magnet',target:'_blank',features:'noopener,noreferrer'}],'A second click on the selected node must open its representative repository.');
+ assert.deepEqual(await evaluate('openedRepositories'),[],'Repeated node clicks must not open repository tabs.');
  const clicked=await view();
  await pressKey('ArrowRight','ArrowRight',39);
  const nudged=await view();
