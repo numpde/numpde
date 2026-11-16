@@ -6,7 +6,7 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
   const edgeOptions = document.getElementById('edge-options');
   const legend = document.getElementById('legend-content');
   const parameters = new URLSearchParams(location.search);
-  const defaults = { color: 'commits', size: 'complexity' };
+  const defaults = { color: 'domain', size: 'difficulty' };
   const repositories = new Map(inventory.repositories.map(repo => [repo.id, repo]));
   const info = new Map(inventory.projects.map(project => {
     const members = project.repository_ids.map(id => repositories.get(id));
