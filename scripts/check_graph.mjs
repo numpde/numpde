@@ -387,7 +387,7 @@ try{
  assert.equal((await view()).zoom,beforeSwitch.zoom);
  assert.deepEqual(await evaluate(`cy.edges().map(e=>e.id()).sort()`),inventory.links.map(e=>e.id).sort());
  assert.equal(await evaluate('neighborhoodMap'),null);
- assert.equal(await evaluate(`document.querySelector('#views a[aria-current="page"]').dataset.view`),'curated');
+ assert.equal(await evaluate(`document.querySelector('#view-toggle').dataset.current`),'curated');
  await evaluate(`document.querySelector('#edge-filter summary').focus();document.querySelector('#edge-filter summary').click();document.querySelector('.filter-actions button:last-child').click();document.querySelector('input[name="types"][value="complements"]').click()`);
  await evaluate(`for(const name of ['basis','confidence']){const inputs=[...document.querySelectorAll('input[name="'+name+'"]')];for(const input of inputs)input.checked=input.value===(name==='basis'?'prospective':'high');inputs[0].dispatchEvent(new Event('change',{bubbles:true}))}`);
  await nextFrames();
