@@ -90,6 +90,10 @@ function attachGraphFisheye({ cy, graph }) {
   function draw() {
     frame = null;
     if (!enabled || !pointer || document.hidden || graph.getAttribute('aria-busy') === 'true') return hide();
+    const graphRenderer = cy.renderer();
+    // Forces may update positions between the main render and this callback.
+    // Bring cached label and edge projections up to the same frame first.
+    graphRenderer.flushRenderedStyleQueue();
     const radius = Math.min(200, innerWidth * .42, innerHeight * .42);
     const diameter = radius * 2, pixelRatio = devicePixelRatio || 1;
     const size = Math.ceil(diameter * pixelRatio);
@@ -114,7 +118,6 @@ function attachGraphFisheye({ cy, graph }) {
     sourceContext.translate((radius + pan.x - (pointer.x - bounds.left)) * scale,
       (radius + pan.y - (pointer.y - bounds.top)) * scale);
     sourceContext.scale(cy.zoom() * scale, cy.zoom() * scale);
-    const graphRenderer = cy.renderer();
     graphRenderer.drawElements(sourceContext, graphRenderer.getCachedZSortedEles());
     sourceContext.restore();
     const { gl } = renderer;
