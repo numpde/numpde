@@ -315,7 +315,7 @@ function attachGraphFisheye({ cy, graph }) {
   graph.addEventListener('pointerleave', () => { pointer = null; schedule(); });
   toggle.addEventListener('click', () => setEnabled(!enabled, true));
   document.addEventListener('keydown', event => {
-    if (event.key !== 'Escape' || !enabled) return;
+    if (event.key !== 'Escape' || event.defaultPrevented || !enabled) return;
     event.preventDefault();
     event.stopPropagation();
     setEnabled(false, true);

@@ -84,7 +84,7 @@
   </style>
   <script src="assets/vendor/cytoscape-3.34.4.min.js"></script>
   <script src="assets/graph-controls.js?v=f9ee45a1da7f"></script>
-  <script src="assets/graph-fisheye.js?v=725e4faabcb3"></script>
+  <script src="assets/graph-fisheye.js?v=67d66db7a1c2"></script>
 </head>
 <body>
   <main id="graph" tabindex="0" aria-label="Projects" aria-busy="true"></main>
@@ -504,6 +504,13 @@
       graph.focus({ preventScroll: true });
     }
 
+    document.addEventListener('keydown', event => {
+      if (event.key !== 'Escape' || document.getElementById('node-info').hidden) return;
+      event.preventDefault();
+      event.stopPropagation();
+      closeNodeInfo();
+    }, true);
+
     function selectNode(node) {
       selected = node;
       updateSelectionBorders();
@@ -620,8 +627,7 @@
         fitView();
       } else if (event.key === 'Escape') {
         event.preventDefault();
-        if (!document.getElementById('node-info').hidden) closeNodeInfo();
-        else selectNode(null);
+        selectNode(null);
       }
     });
 
