@@ -131,6 +131,19 @@
     let bubbleDrag = null;
     let positioningBubble = false;
     let liveFrame = null;
+    let liveSession = 0, liveInputRevision = 0, liveWorkerRunning = false;
+    let liveSnapshot = null, liveNodes = [];
+    const liveNodeRevisions = new Map();
+    const physicsWorker = new Worker('assets/graph-physics.js?v=09f81abfb1e3');
+    physicsWorker.onmessage = ({ data }) => {
+      if (data.session !== liveSession || !liveActive) return;
+      liveSnapshot = data;
+      if (liveFrame === null && !document.hidden) liveFrame = requestAnimationFrame(publishLivePositions);
+    };
+    physicsWorker.onerror = event => {
+      stopLiveLayout();
+      console.error('Graph physics worker failed:', event.message);
+    };
     let liveActive = false;
     let layoutPreview = false;
     let initialMotion = false;
@@ -226,9 +239,17 @@
       graph.addEventListener(event, () => { initialMotion = false; }, { passive: true });
     }
 
-    function stopLiveLayout() {
+    function cancelLiveWork() {
+      liveSession++;
+      physicsWorker.postMessage({ type: 'stop' });
+      liveWorkerRunning = false;
+      liveSnapshot = null;
       if (liveFrame !== null) cancelAnimationFrame(liveFrame);
       liveFrame = null;
+    }
+
+    function stopLiveLayout() {
+      cancelLiveWork();
       liveActive = false;
       liveNeighborhood = null;
       liveSourceId = null;
@@ -239,221 +260,84 @@
       }
     }
 
-    // Adapted from best-practices.html: Cytoscape owns a grabbed node, while
-    // springs and box-aware repulsion move its neighbors without moving the camera.
+    function publishLivePositions() {
+      liveFrame = null;
+      const snapshot = liveSnapshot;
+      liveSnapshot = null;
+      if (!snapshot || snapshot.session !== liveSession) return;
+      const thresholdSquared = (.15 / cy.zoom()) ** 2;
+      // A drag or keyboard move owns its node until the worker acknowledges it.
+      cy.batch(() => liveNodes.forEach((node, i) => {
+        if (node.grabbed() || node.locked() || snapshot.positions[i * 3 + 2] < (liveNodeRevisions.get(node.id()) ?? 0)) return;
+        const x = snapshot.positions[i * 3], y = snapshot.positions[i * 3 + 1], current = node.position();
+        const dx = x - current.x, dy = y - current.y;
+        if (snapshot.settled ? dx !== 0 || dy !== 0 : dx * dx + dy * dy >= thresholdSquared) node.position({ x, y });
+      }));
+      if (snapshot.settled && snapshot.revision === liveInputRevision) {
+        layoutAnchors = new Map(liveNodes.map((node, i) => [node.id(), {
+          x: snapshot.positions[i * 3], y: snapshot.positions[i * 3 + 1]
+        }]));
+        const refit = initialMotion;
+        stopLiveLayout();
+        if (refit) fitView();
+      }
+    }
+
+    function sendLiveInput(node, neighborhood, anchors) {
+      if (!liveWorkerRunning) return;
+      liveNodeRevisions.set(node.id(), ++liveInputRevision);
+      physicsWorker.postMessage({ type: 'input', session: liveSession, revision: liveInputRevision,
+        id: node.id(), position: { ...node.position() }, grabbed: node.grabbed(), locked: node.locked(),
+        target: positionTargets.get(node.id()), neighborhood, anchors });
+    }
+
     function startLiveLayout(source = null) {
       if (!cy || arrangement) return;
+      let neighborhood, anchors;
       if (source) {
-        // Manual interaction takes over even if initial settling is ongoing.
-        if (!layoutAnchors) layoutAnchors = new Map(cy.nodes().map(node => [node.id(), { ...node.position() }]));
+        if (!layoutAnchors) {
+          layoutAnchors = new Map(cy.nodes().map(node => [node.id(), { ...node.position() }]));
+          anchors = [...layoutAnchors];
+        }
         if (liveSourceId !== source.id()) {
           let affected = source.collection();
           for (let hop = 0; hop < 2; hop++) affected = affected.union(affected.connectedEdges().not('.filtered-out').connectedNodes());
           liveNeighborhood = new Set(affected.map(node => node.id()));
           liveSourceId = source.id();
+          neighborhood = [...liveNeighborhood];
         }
       }
       liveActive = true;
-      if (document.hidden || liveFrame !== null) return;
+      if (document.hidden) return;
+      if (liveWorkerRunning) {
+        if (source) sendLiveInput(source, neighborhood, anchors);
+        return;
+      }
       layoutPreview = true;
       cy.edges().addClass('layout-preview');
-      const stepsPerFrame = matchMedia('(prefers-reduced-motion: reduce)').matches ? 24 : 12;
-      // Measure the original geometry; larger rendering must not alter forces.
-      const bodies = cy.nodes(':visible').map(node => {
-        const position = node.position(), padding = node.data('padding');
-        // The pinned renderer adds one bounding-box unit on each side.
-        const extra = 2 * padding + physicsBorderWidth + 2;
-        return {
-          node, degree: 0,
-          halfWidth: (node.data('width') + extra) / 2, halfHeight: (node.data('height') + extra) / 2,
-          x: position.x, y: position.y, publishedX: position.x, publishedY: position.y,
-          vx: 0, vy: 0, previousX: 0, previousY: 0
-        };
+      liveNodes = cy.nodes(':visible').toArray();
+      liveInputRevision = 0;
+      liveNodeRevisions.clear();
+      const bodies = liveNodes.map(node => {
+        const padding = node.data('padding'), extra = 2 * padding + physicsBorderWidth + 2;
+        return { id: node.id(), ...node.position(), grabbed: node.grabbed(), locked: node.locked(),
+          halfWidth: (node.data('width') + extra) / 2, halfHeight: (node.data('height') + extra) / 2 };
       });
-      const byId = new Map(bodies.map(body => [body.node.id(), body]));
-      const center = bodies.reduce((point, body) => {
-        const position = body.node.position();
-        point.x += position.x / bodies.length;
-        point.y += position.y / bodies.length;
-        return point;
-      }, { x: 0, y: 0 });
-      // Relationship types share one physical spring between a pair of nodes.
       const pairs = new Map();
       for (const edge of cy.edges().not('.filtered-out')) {
-        const ids = [edge.source().id(), edge.target().id()].sort();
-        const key = ids.join('\0');
-        if (pairs.has(key)) continue;
-        const a = byId.get(ids[0]), b = byId.get(ids[1]);
-        a.degree++; b.degree++;
-        pairs.set(key, { a, b, length: edge.data('length') ?? 65 });
+        const ids = [edge.source().id(), edge.target().id()].sort(), key = ids.join('\0');
+        if (!pairs.has(key)) pairs.set(key, { a: ids[0], b: ids[1], length: edge.data('length') ?? 65 });
       }
-      const links = [...pairs.values()];
-      for (const link of links) {
-        // d3-force also reduces spring strength around highly connected nodes.
-        link.strength = .04 / Math.min(link.a.degree, link.b.degree);
-      }
-      let quietSteps = 0;
-      const tick = () => {
-        const deadline = performance.now() + 6;
-        for (const body of bodies) {
-          const position = body.node.position();
-          // External dragging and keyboard movement override the simulation;
-          // unpublished subpixel motion continues accumulating internally.
-          if (position.x !== body.publishedX || position.y !== body.publishedY) {
-            body.x = body.publishedX = position.x;
-            body.y = body.publishedY = position.y;
-          }
-          body.fixed = body.node.grabbed() || body.node.locked()
-            || (liveNeighborhood !== null && !liveNeighborhood.has(body.node.id()));
-          if (body.fixed) {
-            body.x = body.publishedX = position.x;
-            body.y = body.publishedY = position.y;
-          }
-        }
-        const dragging = bodies.some(body => body.node.grabbed());
-        const local = liveNeighborhood !== null;
-        // Local interaction permits rotation and repacking while distant nodes
-        // stay fixed, unless direct contact needs to make room around them.
-        for (let iteration = 0; iteration < stepsPerFrame; iteration++) {
-          for (const body of bodies) {
-            body.previousX = body.x;
-            body.previousY = body.y;
-          }
-          for (let i = 0; i < bodies.length; i++) {
-            for (let j = i + 1; j < bodies.length; j++) {
-              const a = bodies[i], b = bodies[j];
-              if (local && a.fixed && b.fixed) continue;
-              let dx = b.x - a.x, dy = b.y - a.y;
-              if (dx === 0 && dy === 0) {
-                // Coincident pairs need distinct directions, not a shared diagonal.
-                const angle = (i * bodies.length + j) * 2.399963229728653;
-                dx = Math.cos(angle); dy = Math.sin(angle);
-              }
-              const distance = Math.sqrt(dx * dx + dy * dy);
-              const gapX = Math.max(0, Math.abs(dx) - a.halfWidth - b.halfWidth);
-              const gapY = Math.max(0, Math.abs(dy) - a.halfHeight - b.halfHeight);
-              const gap = Math.sqrt(gapX * gapX + gapY * gapY);
-              // Unbounded 1/d repulsion separates neighborhoods at every scale;
-              // softened surface pressure supplies extra room around labels.
-              const force = 120 / Math.max(40, distance) + 3 / (1 + gap / 80) ** 2;
-              const fx = dx / distance * force, fy = dy / distance * force;
-              a.vx -= fx; a.vy -= fy;
-              b.vx += fx; b.vy += fy;
-            }
-          }
-          for (const { a, b, length, strength } of links) {
-            let dx = b.x - a.x, dy = b.y - a.y;
-            if (dx === 0 && dy === 0) { dx = 1; dy = 1; }
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            const ux = Math.abs(dx) / distance, uy = Math.abs(dy) / distance;
-            // Measure the gap between rectangle boundaries along the edge.
-            const clearance = Math.min(a.halfWidth / ux, a.halfHeight / uy)
-              + Math.min(b.halfWidth / ux, b.halfHeight / uy);
-            const target = clearance + length;
-            const force = (distance - target) * strength;
-            const fx = dx / distance * force, fy = dy / distance * force;
-            a.vx += fx; a.vy += fy;
-            b.vx -= fx; b.vy -= fy;
-          }
-          for (const body of bodies) {
-            if (body.fixed) {
-              body.vx = 0; body.vy = 0;
-              continue;
-            }
-            // Preserve deliberate placements, but let ordinary neighbors reflow.
-            const anchor = positionTargets.get(body.node.id()) ?? layoutAnchors?.get(body.node.id());
-            const anchorStrength = positionTargets.has(body.node.id()) ? .15 : .008;
-            const anchorX = anchor ? (anchor.x - body.x) * anchorStrength : 0;
-            const anchorY = anchor ? (anchor.y - body.y) * anchorStrength : 0;
-            // A weak shared center contains disconnected components without
-            // tethering individual nodes to a packed arrangement.
-            body.vx = (body.vx + (center.x - body.x) * .001 + anchorX) * .78;
-            body.vy = (body.vy + (center.y - body.y) * .001 + anchorY) * .78;
-            const limit = Math.min(1, 1 / (Math.sqrt(body.vx * body.vx + body.vy * body.vy) || 1));
-            body.vx *= limit; body.vy *= limit;
-          }
-          // Blend corrections into predicted velocities instead of snapping
-          // positions and erasing the motion needed to escape a crowded patch.
-          let overlap = 0;
-          for (let sweep = 0; sweep < 2; sweep++) {
-            for (let i = 0; i < bodies.length; i++) {
-              for (let j = i + 1; j < bodies.length; j++) {
-                const a = bodies[i], b = bodies[j];
-                if (a.fixed && b.fixed) continue;
-                let dx = b.x + b.vx - a.x - a.vx, dy = b.y + b.vy - a.y - a.vy;
-                const overlapX = a.halfWidth + b.halfWidth + 24 - Math.abs(dx);
-                const overlapY = a.halfHeight + b.halfHeight + 24 - Math.abs(dy);
-                if (overlapX <= 0 || overlapY <= 0) continue;
-                // Release a spatial neighbor only when pressure reaches its
-                // inner 8px margin; graph distance alone must not trap a node.
-                if (local && overlapX > 16 && overlapY > 16) {
-                  if (a.fixed && !a.node.locked() && !a.node.grabbed()) {
-                    liveNeighborhood.add(a.node.id()); a.fixed = false;
-                  }
-                  if (b.fixed && !b.node.locked() && !b.node.grabbed()) {
-                    liveNeighborhood.add(b.node.id()); b.fixed = false;
-                  }
-                }
-                const freeA = !a.fixed;
-                const freeB = !b.fixed;
-                const free = Number(freeA) + Number(freeB);
-                if (!free) continue;
-                overlap = Math.max(overlap, Math.min(overlapX, overlapY) - 24);
-                if (dx === 0 && dy === 0) {
-                  const angle = (i * bodies.length + j) * 2.399963229728653;
-                  dx = Math.cos(angle); dy = Math.sin(angle);
-                }
-                const distance = Math.sqrt(dx * dx + dy * dy), ux = dx / distance, uy = dy / distance;
-                const clearance = Math.min((a.halfWidth + b.halfWidth + 24) / Math.abs(ux),
-                  (a.halfHeight + b.halfHeight + 24) / Math.abs(uy));
-                // Correct along the line between centers, avoiding horizontal
-                // and vertical snapping that packs rectangles into rows.
-                const push = (clearance - distance) * .7 / free;
-                if (freeA) { a.vx -= ux * push; a.vy -= uy * push; }
-                if (freeB) { b.vx += ux * push; b.vy += uy * push; }
-              }
-            }
-          }
-          let movementSquared = 0;
-          for (const body of bodies) {
-            if (body.fixed) continue;
-            body.x += body.vx; body.y += body.vy;
-            const dx = body.x - body.previousX, dy = body.y - body.previousY;
-            movementSquared = Math.max(movementSquared, dx * dx + dy * dy);
-          }
-          quietSteps = !dragging && movementSquared < .01 && overlap < .5 ? quietSteps + 1 : 0;
-          if (quietSteps >= 12 || performance.now() >= deadline) break;
-        }
-        const settled = quietSteps >= 12, thresholdSquared = (.15 / cy.zoom()) ** 2;
-        const updated = bodies.filter(body => {
-          if (body.fixed) return false;
-          const dx = body.x - body.publishedX, dy = body.y - body.publishedY;
-          return settled ? dx !== 0 || dy !== 0 : dx * dx + dy * dy >= thresholdSquared;
-        });
-        if (updated.length) cy.batch(() => updated.forEach(body => {
-          body.node.position({ x: body.x, y: body.y });
-          body.publishedX = body.x; body.publishedY = body.y;
-        }));
-        if (quietSteps >= 12) {
-          // The relaxed positions become the reference for the next interaction.
-          layoutAnchors = new Map(bodies.map(body => [body.node.id(), { x: body.x, y: body.y }]));
-          const refit = initialMotion;
-          stopLiveLayout();
-          if (refit) {
-            fitView();
-          }
-          return;
-        }
-        liveFrame = requestAnimationFrame(tick);
-      };
-      liveFrame = requestAnimationFrame(tick);
+      liveWorkerRunning = true;
+      physicsWorker.postMessage({ type: 'start', session: liveSession, bodies, links: [...pairs.values()],
+        neighborhood: liveNeighborhood === null ? null : [...liveNeighborhood],
+        anchors: layoutAnchors === null ? null : [...layoutAnchors], targets: [...positionTargets],
+        stepsPerBatch: matchMedia('(prefers-reduced-motion: reduce)').matches ? 24 : 12 });
     }
 
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        if (liveFrame !== null) cancelAnimationFrame(liveFrame);
-        liveFrame = null;
-      } else if (liveActive) startLiveLayout();
+      if (document.hidden) cancelLiveWork();
+      else if (liveActive) startLiveLayout();
     });
 
     function fitView() {
@@ -758,7 +642,10 @@
         if (!node || selected !== node || document.getElementById('node-info').hidden) selectNode(node);
         graph.focus({ preventScroll: true });
       });
-      cy.on('grab', 'node', () => { graph.style.cursor = 'grabbing'; draggedNode = null; });
+      cy.on('grab', 'node', event => {
+        graph.style.cursor = 'grabbing'; draggedNode = null;
+        sendLiveInput(event.target);
+      });
       cy.on('drag', 'node', event => {
         draggedNode = event.target;
         startLiveLayout(event.target);
@@ -766,6 +653,7 @@
       cy.on('free', 'node', event => {
         graph.style.cursor = '';
         if (draggedNode === event.target) positionTargets.set(draggedNode.id(), { ...draggedNode.position() });
+        sendLiveInput(event.target);
         draggedNode = null;
       });
       let width = cy.width(), height = cy.height();

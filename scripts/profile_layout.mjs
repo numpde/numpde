@@ -1,5 +1,5 @@
 // Run in the generic Node container against the existing debug window.
-// Measures physics and forced redraw CPU work with the lens off, not presented FPS.
+// Separates worker compute, publication, and redraw CPU work; does not measure FPS.
 const endpoint = process.argv[2] || 'http://127.0.0.1:9333';
 const targets = await (await fetch(`${endpoint}/json/list`)).json();
 const target = targets.find(page => page.type === 'page' && page.title === 'Projects');
@@ -26,74 +26,68 @@ function call(method, params = {}) {
   });
 }
 
-function profileLayout() {
+async function profileLayout() {
   const button = document.getElementById('fisheye-toggle');
-  const wasEnabled = button.getAttribute('aria-pressed') === 'true', wasActive = liveActive;
-  const camera = { zoom: cy.zoom(), pan: { ...cy.pan() } };
-  const anchors = layoutAnchors, targets = new Map(positionTargets);
-  const positions = cy.nodes().map(node => ({ node, position: { ...node.position() } }));
-  const originalFrame = requestAnimationFrame, originalCancel = cancelAnimationFrame, renderer = cy.renderer();
-  let tick, published = 0;
-  const countPublished = () => published++;
-  stopLiveLayout();
-  if (wasEnabled) button.click();
-  window.requestAnimationFrame = callback => {
-    if (callback.name === 'tick') { tick = callback; return -1; }
-    return originalFrame(callback);
+  const saved = { view: currentView, active: liveActive, lens: button.getAttribute('aria-pressed') === 'true',
+    positions: cy.nodes().map(node => ({ node, position: { ...node.position() } })),
+    camera: { zoom: cy.zoom(), pan: { ...cy.pan() } }, anchors: layoutAnchors, targets: new Map(positionTargets) };
+  const renderer = cy.renderer(), receive = physicsWorker.onmessage;
+  let snapshots = 0, latest = null;
+  physicsWorker.onmessage = event => {
+    if (event.data.session === liveSession) { snapshots++; latest = event.data; }
+    receive(event);
   };
-  window.cancelAnimationFrame = id => { if (id !== -1) originalCancel(id); };
-  cy.on('position', 'node', countPublished);
-  function paintMain() {
-    const start = performance.now();
-    renderer.redrawHint('eles', true);
-    for (const { fn } of renderer.beforeRenderCallbacks) fn(true, performance.now());
-    renderer.render();
-    return performance.now() - start;
-  }
+  const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+  const summarize = values => {
+    const sorted = [...values].sort((a, b) => a - b);
+    return { medianMs: sorted[Math.floor(sorted.length / 2)] ?? 0, maxMs: sorted.at(-1) ?? 0 };
+  };
   try {
-    for (let frame = 0; frame < 3; frame++) paintMain();
-    layoutAnchors = new Map(positions.map(({ node, position }) => [node.id(), position]));
-    positionTargets.clear();
-    const source = cy.nodes().toArray().sort((a, b) => b.degree() - a.degree())[0];
-    const position = source.position();
-    source.position({ x: position.x + 50 / cy.zoom(), y: position.y });
-    positionTargets.set(source.id(), { ...source.position() });
-    const start = performance.now();
-    startLiveLayout(source);
-    const setupMs = performance.now() - start, samples = [];
-    let time = performance.now();
-    for (let frame = 0; frame < 20 && liveActive; frame++) {
-      published = 0;
-      const begin = performance.now();
-      tick(time += frame < 10 ? 16.67 : 40);
-      const afterTick = performance.now();
-      const renderMs = paintMain();
-      samples.push({ physicsMs: afterTick - begin, renderMs, published });
-    }
-    const stats = values => {
-      const sorted = [...values].sort((a, b) => a - b);
-      return { median: sorted[Math.floor(sorted.length / 2)], max: sorted.at(-1) };
-    };
-    const summarize = frames => Object.fromEntries(['physicsMs', 'renderMs', 'published'].map(key => [key, stats(frames.map(frame => frame[key]))]));
-    return { viewport: [innerWidth, innerHeight, devicePixelRatio], nodes: cy.nodes().length, edges: cy.edges().length,
-      source: source.id(), localNodes: liveNeighborhood?.size, setupMs,
-      normal: summarize(samples.slice(0, 10)), slowFrames: summarize(samples.slice(10)) };
-  } finally {
     stopLiveLayout();
-    cy.off('position', 'node', countPublished);
-    window.requestAnimationFrame = originalFrame;
-    window.cancelAnimationFrame = originalCancel;
-    cy.batch(() => positions.forEach(({ node, position }) => node.position(position)));
-    cy.viewport(camera);
-    layoutAnchors = anchors;
-    positionTargets = targets;
-    if (wasEnabled) button.click();
-    if (wasActive) startLiveLayout();
+    if (saved.lens) button.click();
+    const results = [];
+    for (const target of [saved.view === 'curated' ? 'embedded' : 'curated', saved.view]) {
+      snapshots = 0; latest = null;
+      const started = performance.now(), renderTimes = [], publishTimes = [];
+      switchView(target, true);
+      const setupMs = performance.now() - started;
+      while (liveActive && performance.now() - started < 30000) {
+        await wait(16);
+        if (!liveSnapshot) continue;
+        // Consume the latest snapshot even when an occluded debug window is
+        // withholding animation frames. These are CPU timings, not FPS.
+        if (liveFrame !== null) cancelAnimationFrame(liveFrame);
+        const beforePublish = performance.now();
+        publishLivePositions();
+        publishTimes.push(performance.now() - beforePublish);
+        const beforeRender = performance.now();
+        renderer.redrawHint('eles', true);
+        for (const { fn } of renderer.beforeRenderCallbacks) fn(true, performance.now());
+        renderer.render();
+        renderTimes.push(performance.now() - beforeRender);
+      }
+      results.push({ target, setupMs, settled: !liveActive, observedMs: performance.now() - started,
+        workerElapsedMs: latest?.elapsedMs, workerComputeMs: latest?.computeMs, steps: latest?.steps,
+        snapshots, publish: summarize(publishTimes), render: summarize(renderTimes) });
+      stopLiveLayout();
+    }
+    return { viewport: [innerWidth, innerHeight, devicePixelRatio], nodes: cy.nodes().length, results };
+  } finally {
+    physicsWorker.onmessage = receive;
+    stopLiveLayout();
+    switchView(saved.view, true);
+    stopLiveLayout();
+    cy.batch(() => saved.positions.forEach(({ node, position }) => node.position(position)));
+    cy.viewport(saved.camera);
+    layoutAnchors = saved.anchors;
+    positionTargets = saved.targets;
+    if (saved.lens) button.click();
+    if (saved.active) startLiveLayout();
   }
 }
 
 try {
-  const result = await call('Runtime.evaluate', { expression: `(${profileLayout})()`, returnByValue: true });
+  const result = await call('Runtime.evaluate', { expression: `(${profileLayout})()`, awaitPromise: true, returnByValue: true });
   if (result.exceptionDetails) throw Error(JSON.stringify(result.exceptionDetails));
   console.log(JSON.stringify(result.result.value, null, 2));
 } finally {
