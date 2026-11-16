@@ -114,6 +114,7 @@
   <script>
     const graph = document.getElementById('graph');
     const nodeDisplayScale = 2;
+    const nodeLabelScale = 1.4;
     let cy = null;
     let arrangement = null;
     let selected = null;
@@ -689,11 +690,11 @@
         autounselectify: true, desktopTapThreshold: 5, touchTapThreshold: 8,
         style: [
           { selector: 'node', style: {
-            shape: 'round-rectangle', width: node => node.data('width') * nodeDisplayScale,
+            shape: 'round-rectangle', width: node => Math.max(node.data('width'), node.data('labelWidth') * nodeLabelScale) * nodeDisplayScale,
             height: node => node.data('height') * nodeDisplayScale,
             padding: node => node.data('padding') * nodeDisplayScale,
             label: 'data(label)', 'font-family': 'system-ui, sans-serif',
-            'font-size': 13 * nodeDisplayScale, 'font-weight': 600, 'text-valign': 'center',
+            'font-size': 13 * nodeDisplayScale * nodeLabelScale, 'font-weight': 600, 'text-valign': 'center',
             'text-halign': 'center', 'text-wrap': 'none', color: 'data(textColor)',
             'background-color': 'data(color)', 'border-style': 'data(borderStyle)',
             'border-color': 'mapData(selectionStrength, 0, 1, #4d6170, #9fe4cf)',
