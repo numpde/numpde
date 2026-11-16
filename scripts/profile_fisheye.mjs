@@ -90,7 +90,7 @@ async function profile() {
     for (let frame = 0; frame < 120; frame++) {
       const result = sample();
       samples.push(result);
-      if (result.sharp) return { frames: samples.length, ...summarize(samples) };
+      if (result.sharp && result.uploads === 0) return { frames: samples.length, ...summarize(samples) };
     }
     throw Error('The lens did not finish sharp refinement within 120 drawing passes.');
   }
