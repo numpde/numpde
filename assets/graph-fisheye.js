@@ -107,12 +107,15 @@ function attachGraphFisheye({ cy, graph }) {
         float sourceRadius = -log(1.0 - radius * (1.0 - exp(-distortion))) / distortion;
         vec2 sampleOffset = radius > 0.00001 ? offset * sourceRadius / radius : vec2(0.0);
         gl_FragColor = texture2D(graphImage, focus + sampleOffset * reach);
-        // Keep the crosshair small in screen pixels, independent of zoom.
+        // Fine rounded arms leave the focal point unobstructed.
         vec2 p = abs((uv - 0.5) * diameter);
-        float hair = min(max(p.x - 5.0, p.y - 0.6), max(p.y - 5.0, p.x - 0.6));
-        float outline = min(max(p.x - 6.0, p.y - 1.6), max(p.y - 6.0, p.x - 1.6));
-        gl_FragColor = mix(gl_FragColor, vec4(0.06, 0.09, 0.12, 1.0), 1.0 - smoothstep(-0.25, 0.25, outline));
-        gl_FragColor = mix(gl_FragColor, vec4(0.8, 0.94, 0.9, 1.0), 1.0 - smoothstep(-0.25, 0.25, hair));
+        float horizontal = length(vec2(p.x - clamp(p.x, 4.0, 8.0), p.y));
+        float vertical = length(vec2(p.y - clamp(p.y, 4.0, 8.0), p.x));
+        float hair = min(horizontal, vertical) - 0.5;
+        gl_FragColor = mix(gl_FragColor, vec4(0.04, 0.07, 0.09, 1.0),
+          0.65 * (1.0 - smoothstep(0.25, 1.0, hair)));
+        gl_FragColor = mix(gl_FragColor, vec4(0.7, 0.9, 0.83, 1.0),
+          0.95 * (1.0 - smoothstep(-0.25, 0.25, hair)));
       }
     `);
     gl.compileShader(fragment);
