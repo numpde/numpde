@@ -9,8 +9,30 @@ function attachGraphFisheye({ cy, graph }) {
   const background = getComputedStyle(document.documentElement).backgroundColor;
   const distortion = 4;
   const peakZoom = distortion / (1 - Math.exp(-distortion));
+  const fixedLens = matchMedia('(hover: none) and (pointer: coarse)');
   const touches = new Set();
   let enabled = false, pointer = null, frame = null, renderer = null;
+  let panThroughNodes = null;
+
+  function fixedGeometry() {
+    return { x: innerWidth / 2, y: innerHeight / 2, radius: Math.min(innerWidth, innerHeight) * .4 };
+  }
+
+  function mobileLens() {
+    return fixedLens.matches || panThroughNodes !== null;
+  }
+
+  function syncGestures() {
+    // Finish the current touch gesture under the rules with which it started.
+    if (touches.size) return;
+    if (enabled && fixedLens.matches && panThroughNodes === null) {
+      panThroughNodes = cy.nodes().filter(node => !node.pannable());
+      panThroughNodes.panify();
+    } else if ((!enabled || !fixedLens.matches) && panThroughNodes !== null) {
+      panThroughNodes.unpanify();
+      panThroughNodes = null;
+    }
+  }
 
   function initializeRenderer() {
     const gl = lens.getContext('webgl', { alpha: true, antialias: false });
@@ -80,7 +102,7 @@ function attachGraphFisheye({ cy, graph }) {
   }
 
   function schedule() {
-    if (!enabled || !pointer || document.hidden || graph.getAttribute('aria-busy') === 'true') {
+    if (!enabled || (!mobileLens() && !pointer) || document.hidden || graph.getAttribute('aria-busy') === 'true') {
       hide();
       return;
     }
@@ -89,18 +111,20 @@ function attachGraphFisheye({ cy, graph }) {
 
   function draw() {
     frame = null;
-    if (!enabled || !pointer || document.hidden || graph.getAttribute('aria-busy') === 'true') return hide();
+    if (!enabled || (!mobileLens() && !pointer) || document.hidden || graph.getAttribute('aria-busy') === 'true') return hide();
     const graphRenderer = cy.renderer();
     // Forces may update positions between the main render and this callback.
     // Bring cached label and edge projections up to the same frame first.
     graphRenderer.flushRenderedStyleQueue();
-    const radius = Math.min(200, innerWidth * .42, innerHeight * .42);
+    const fixed = mobileLens() ? fixedGeometry() : null;
+    const focus = fixed ?? pointer;
+    const radius = fixed ? fixed.radius : Math.min(200, innerWidth * .42, innerHeight * .42);
     const diameter = radius * 2, pixelRatio = devicePixelRatio || 1;
     const size = Math.ceil(diameter * pixelRatio);
     if (lens.width !== size || lens.height !== size) { lens.width = size; lens.height = size; }
     lens.style.width = lens.style.height = diameter + 'px';
-    let x = pointer.x, y = pointer.y;
-    if (pointer.touch) {
+    let x = focus.x, y = focus.y;
+    if (!fixed && pointer.touch) {
       x = Math.max(radius + 8, Math.min(innerWidth - radius - 8, x));
       y = Math.max(radius + 8, Math.min(innerHeight - radius - 8, y - radius - 32));
     }
@@ -115,8 +139,8 @@ function attachGraphFisheye({ cy, graph }) {
     // Use the pinned renderer's vector export path. renderTo() reuses viewport
     // textures, so a larger canvas still magnifies cached low-resolution text.
     sourceContext.save();
-    sourceContext.translate((radius + pan.x - (pointer.x - bounds.left)) * scale,
-      (radius + pan.y - (pointer.y - bounds.top)) * scale);
+    sourceContext.translate((radius + pan.x - (focus.x - bounds.left)) * scale,
+      (radius + pan.y - (focus.y - bounds.top)) * scale);
     sourceContext.scale(cy.zoom() * scale, cy.zoom() * scale);
     graphRenderer.drawElements(sourceContext, graphRenderer.getCachedZSortedEles());
     sourceContext.restore();
@@ -136,6 +160,7 @@ function attachGraphFisheye({ cy, graph }) {
       next = false;
     }
     enabled = next;
+    syncGestures();
     toggle.setAttribute('aria-pressed', String(enabled));
     if (write) {
       const url = new URL(location.href);
@@ -153,6 +178,7 @@ function attachGraphFisheye({ cy, graph }) {
   }
 
   function track(event) {
+    if (mobileLens()) return;
     if (event.pointerType === 'touch' && touches.size !== 1) { pointer = null; hide(); return; }
     pointer = { x: event.clientX, y: event.clientY, touch: event.pointerType === 'touch' };
     schedule();
@@ -165,9 +191,11 @@ function attachGraphFisheye({ cy, graph }) {
   graph.addEventListener('pointermove', track, { passive: true });
   for (const name of ['pointerup', 'pointercancel']) graph.addEventListener(name, event => {
     if (event.pointerType !== 'touch') return;
-    touches.delete(event.pointerId); pointer = null; hide();
+    touches.delete(event.pointerId); pointer = null;
+    // Let native touchend finish before restoring another drag policy.
+    setTimeout(() => { syncGestures(); schedule(); }, 0);
   }, { passive: true });
-  graph.addEventListener('pointerleave', () => { pointer = null; hide(); });
+  graph.addEventListener('pointerleave', () => { pointer = null; schedule(); });
   toggle.addEventListener('click', () => setEnabled(!enabled, true));
   document.addEventListener('keydown', event => {
     if (event.key !== 'Escape' || !enabled) return;
@@ -177,9 +205,10 @@ function attachGraphFisheye({ cy, graph }) {
   }, true);
   cy.on('render', schedule);
   addEventListener('resize', schedule);
+  fixedLens.addEventListener('change', () => { pointer = null; syncGestures(); schedule(); });
   addEventListener('popstate', () => setEnabled(new URLSearchParams(location.search).get('fisheye') === '1'));
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { touches.clear(); pointer = null; }
+    if (document.hidden) { touches.clear(); pointer = null; syncGestures(); }
     schedule();
   });
   lens.addEventListener('webglcontextlost', event => {
@@ -188,4 +217,23 @@ function attachGraphFisheye({ cy, graph }) {
   });
   lens.addEventListener('webglcontextrestored', () => { toggle.disabled = false; });
   setEnabled(new URLSearchParams(location.search).get('fisheye') === '1');
+  return {
+    nodeAt(renderedPosition, originalNode) {
+      if (!enabled || !mobileLens() || lens.hidden || !renderedPosition) return originalNode;
+      const bounds = graph.getBoundingClientRect(), fixed = fixedGeometry();
+      const center = { x: fixed.x - bounds.left, y: fixed.y - bounds.top };
+      const dx = renderedPosition.x - center.x, dy = renderedPosition.y - center.y;
+      const radius = Math.hypot(dx, dy) / fixed.radius;
+      if (radius > 1) return originalNode;
+      // Match the shader's inverse radial map when picking a magnified node.
+      const sourceRadius = -Math.log1p(-radius * (1 - Math.exp(-distortion))) / distortion;
+      const scale = radius > .00001 ? sourceRadius / radius : 1 / peakZoom;
+      const pan = cy.pan(), zoom = cy.zoom(), graphRenderer = cy.renderer();
+      graphRenderer.flushRenderedStyleQueue();
+      return graphRenderer.findNearestElements(
+        (center.x + dx * scale - pan.x) / zoom,
+        (center.y + dy * scale - pan.y) / zoom, true, false
+      ).find(element => element.isNode()) ?? null;
+    }
+  };
 }
