@@ -15,10 +15,12 @@ function attachGraphFisheye({ cy, graph }) {
   function initializeRenderer() {
     const gl = lens.getContext('webgl', { alpha: true, antialias: false });
     if (!gl) return null;
+    const precision = gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT).precision > 0
+      ? 'highp' : 'mediump';
     const vertex = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertex, `
       attribute vec2 position;
-      varying mediump vec2 uv;
+      varying ${precision} vec2 uv;
       void main() {
         uv = position * 0.5 + 0.5;
         gl_Position = vec4(position, 0.0, 1.0);
@@ -27,14 +29,10 @@ function attachGraphFisheye({ cy, graph }) {
     gl.compileShader(vertex);
     const fragment = gl.createShader(gl.FRAGMENT_SHADER);
     gl.shaderSource(fragment, `
-      #ifdef GL_FRAGMENT_PRECISION_HIGH
-      precision highp float;
-      #else
-      precision mediump float;
-      #endif
+      precision ${precision} float;
       uniform sampler2D graphImage;
       uniform float distortion;
-      varying mediump vec2 uv;
+      varying ${precision} vec2 uv;
       void main() {
         vec2 offset = uv * 2.0 - 1.0;
         float radius = length(offset);
@@ -110,12 +108,15 @@ function attachGraphFisheye({ cy, graph }) {
     sourceContext.fillStyle = background;
     sourceContext.fillRect(0, 0, sourceSize, sourceSize);
     const bounds = graph.getBoundingClientRect(), pan = cy.pan();
-    // Render at extra resolution so central magnification keeps text sharp.
-    // Explicit pixel coordinates avoid changing the graph's zoom or camera.
-    cy.renderTo(sourceContext, cy.zoom() * scale, {
-      x: (radius + pan.x - (pointer.x - bounds.left)) * scale,
-      y: (radius + pan.y - (pointer.y - bounds.top)) * scale
-    }, 1);
+    // Use the pinned renderer's vector export path. renderTo() reuses viewport
+    // textures, so a larger canvas still magnifies cached low-resolution text.
+    sourceContext.save();
+    sourceContext.translate((radius + pan.x - (pointer.x - bounds.left)) * scale,
+      (radius + pan.y - (pointer.y - bounds.top)) * scale);
+    sourceContext.scale(cy.zoom() * scale, cy.zoom() * scale);
+    const graphRenderer = cy.renderer();
+    graphRenderer.drawElements(sourceContext, graphRenderer.getCachedZSortedEles());
+    sourceContext.restore();
     const { gl } = renderer;
     gl.viewport(0, 0, size, size);
     gl.clear(gl.COLOR_BUFFER_BIT);
