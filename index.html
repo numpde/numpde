@@ -521,7 +521,8 @@
       name.id = 'node-info-name'; name.textContent = project.name;
       const description = document.createElement('p'); description.textContent = project.description;
       const activity = document.createElement('p');
-      activity.textContent = `${project.user_work.commit_count.toLocaleString()} personal commits · ${project.user_work.last_activity_date ?? 'No observed personal activity'}`;
+      const commitCount = project.user_work.commit_count;
+      activity.textContent = `${commitCount.toLocaleString()} personal ${commitCount === 1 ? 'commit' : 'commits'} · ${project.user_work.last_activity_date ?? 'No observed personal activity'}`;
       const close = document.createElement('button');
       close.type = 'button'; close.textContent = '×'; close.setAttribute('aria-label', 'Close project information');
       close.addEventListener('click', closeNodeInfo);
