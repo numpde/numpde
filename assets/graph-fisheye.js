@@ -281,13 +281,13 @@ function attachGraphFisheye({ cy, graph }) {
     toggle.setAttribute('aria-pressed', String(enabled));
     if (write) {
       const url = new URL(location.href);
-      if (enabled) url.searchParams.set('fisheye', '1');
-      else url.searchParams.delete('fisheye');
+      if (enabled) url.searchParams.delete('fisheye');
+      else url.searchParams.set('fisheye', '0');
       history.replaceState(null, '', url);
       for (const link of document.querySelectorAll('#views a')) {
         const target = new URL(link.href);
-        if (enabled) target.searchParams.set('fisheye', '1');
-        else target.searchParams.delete('fisheye');
+        if (enabled) target.searchParams.delete('fisheye');
+        else target.searchParams.set('fisheye', '0');
         link.href = target.pathname + target.search;
       }
     }
@@ -332,7 +332,7 @@ function attachGraphFisheye({ cy, graph }) {
   });
   addEventListener('resize', schedule);
   fixedLens.addEventListener('change', () => { pointer = null; syncGestures(); schedule(); });
-  addEventListener('popstate', () => setEnabled(new URLSearchParams(location.search).get('fisheye') === '1'));
+  addEventListener('popstate', () => setEnabled(new URLSearchParams(location.search).get('fisheye') !== '0'));
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) { touches.clear(); pointer = null; syncGestures(); }
     schedule();
@@ -342,7 +342,7 @@ function attachGraphFisheye({ cy, graph }) {
     setEnabled(false, true); renderer = null; toggle.disabled = true;
   });
   lens.addEventListener('webglcontextrestored', () => { toggle.disabled = false; });
-  setEnabled(new URLSearchParams(location.search).get('fisheye') === '1');
+  setEnabled(new URLSearchParams(location.search).get('fisheye') !== '0');
   return {
     nodeAt(renderedPosition, originalNode) {
       if (!enabled || !mobileLens() || lens.hidden || !renderedPosition) return originalNode;

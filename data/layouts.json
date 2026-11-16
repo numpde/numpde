@@ -1,0 +1,1628 @@
+{
+  "embedded": {
+    "positions": {
+      "project:busybus/2017": {
+        "x": 4868.498667529084,
+        "y": 3230.751976311549
+      },
+      "project:numpde/about": {
+        "x": -909.0321714543826,
+        "y": 1960.0248450120744
+      },
+      "project:numpde/agent-mail": {
+        "x": -668.548849836797,
+        "y": 1025.129213234508
+      },
+      "project:numpde/alg2mfg": {
+        "x": 3469.1978165558344,
+        "y": -1503.8002653458454
+      },
+      "project:numpde/aliz": {
+        "x": 4286.072275785137,
+        "y": -332.916005928193
+      },
+      "project:numpde/als1": {
+        "x": 3613.1823276536084,
+        "y": 889.1405086117105
+      },
+      "project:numpde/als1_report": {
+        "x": 3070.333336368178,
+        "y": 374.9232264777088
+      },
+      "project:numpde/als2": {
+        "x": 3402.8724397504325,
+        "y": 553.120969319065
+      },
+      "project:numpde/als2_qichang": {
+        "x": 3467.0320340455723,
+        "y": 1124.8595835298418
+      },
+      "project:numpde/as": {
+        "x": 3796.0610658775054,
+        "y": 711.7827616416838
+      },
+      "project:numpde/ask_openai": {
+        "x": -1735.6198353047178,
+        "y": 94.64798850373275
+      },
+      "project:numpde/authz-core": {
+        "x": -1295.1494329186148,
+        "y": 2944.4105026300845
+      },
+      "project:numpde/auto-cleanup": {
+        "x": 1576.2437270878552,
+        "y": 4610.498616094256
+      },
+      "project:numpde/banksy": {
+        "x": -2431.4049142252443,
+        "y": 2067.1685226226446
+      },
+      "project:lhl/batterylog": {
+        "x": 1716.1854925655905,
+        "y": 4187.997350734349
+      },
+      "project:numpde/best-practices": {
+        "x": 54.28075266212225,
+        "y": 2878.289634130961
+      },
+      "project:numpde/bike-nft": {
+        "x": -1657.3372101087887,
+        "y": 2649.9706364205863
+      },
+      "project:numpde/biohire": {
+        "x": 490.2742041567082,
+        "y": 1139.7081386961286
+      },
+      "project:numpde/biorxiv-digest": {
+        "x": -355.68330368224,
+        "y": 1275.144121780377
+      },
+      "project:numpde/bolt-spec-v0": {
+        "x": 29.48910256685798,
+        "y": 970.8580611489082
+      },
+      "project:numpde/bolt-spec-v0-pages": {
+        "x": -28.878740669429362,
+        "y": 1950.8534626893202
+      },
+      "project:numpde/bolt-spec-v1": {
+        "x": -120.53358295525483,
+        "y": 1178.3742609122032
+      },
+      "project:numpde/bolts-demand": {
+        "x": -23.55400955782394,
+        "y": 1463.4782512301315
+      },
+      "project:numpde/bugs": {
+        "x": 1378.8682196470377,
+        "y": -117.45103337110127
+      },
+      "project:numpde/cannondale-nft": {
+        "x": -2097.2748139177265,
+        "y": 2397.4460891230783
+      },
+      "project:numpde/cbb": {
+        "x": 3386.5854738188555,
+        "y": 852.6960069356994
+      },
+      "project:numpde/chemrxiv-data": {
+        "x": 1847.0538231294138,
+        "y": 1840.626749183259
+      },
+      "project:numpde/fork-of-codex": {
+        "x": 142.72057659204683,
+        "y": 3974.607204219515
+      },
+      "project:numpde/Team03": {
+        "x": 2939.639774568549,
+        "y": 831.2686294086708
+      },
+      "project:numpde/conda-tools": {
+        "x": 1878.0776712426805,
+        "y": 4445.6853698040595
+      },
+      "project:numpde/conix": {
+        "x": -3006.846084837431,
+        "y": 3682.5732835647837
+      },
+      "project:numpde/fork-of-Consent-O-Matic": {
+        "x": -783.8879557605129,
+        "y": -1200.8389742300174
+      },
+      "project:numpde/container-tools": {
+        "x": 2000.8746765097349,
+        "y": 4562.75337167009
+      },
+      "project:duspic/corrupt_json": {
+        "x": 554.8426243019641,
+        "y": 3194.850185579344
+      },
+      "project:numpde/CortexCellDeconv": {
+        "x": 4065.1602997193686,
+        "y": 1071.8042389446512
+      },
+      "project:numpde/counter-resistance": {
+        "x": 1963.6246458715302,
+        "y": 785.7348400747863
+      },
+      "project:numpde/crawler-action": {
+        "x": -599.6297435251498,
+        "y": 1751.220191165669
+      },
+      "project:numpde/dapp32": {
+        "x": -2987.045707576211,
+        "y": 2849.6295167875624
+      },
+      "project:numpde/disable-workspace-switcher-popup": {
+        "x": -832.8826952595002,
+        "y": -1461.300863932584
+      },
+      "project:numpde/django-siam-db": {
+        "x": -1021.592989289058,
+        "y": 3009.509998739736
+      },
+      "project:numpde/downloader": {
+        "x": -2365.0812143071184,
+        "y": 18.898422955980507
+      },
+      "project:numpde/dummy": {
+        "x": -1119.7910453670231,
+        "y": 1759.345865606241
+      },
+      "project:numpde/ecommerce": {
+        "x": -115.93403119228951,
+        "y": -2311.1343258027555
+      },
+      "project:numpde/fork-of-elucidation.cheminfo.org": {
+        "x": 1747.8106735016277,
+        "y": 1652.336346420223
+      },
+      "project:numpde/errata": {
+        "x": 3226.762495791412,
+        "y": -914.3644814740932
+      },
+      "project:numpde/euler": {
+        "x": 2490.6534709476214,
+        "y": 1804.988302061257
+      },
+      "project:numpde/EWCE": {
+        "x": 3873.860858720954,
+        "y": 1035.1922546674386
+      },
+      "project:numpde/ewceData": {
+        "x": 3812.437669640687,
+        "y": 1392.7515396627816
+      },
+      "project:numpde/fork-of-farm_molecular_representation": {
+        "x": 2072.056844491803,
+        "y": 2730.5742224079454
+      },
+      "project:numpde/geepee": {
+        "x": 4809.996427044823,
+        "y": 3514.463984264135
+      },
+      "project:numpde/genesets": {
+        "x": 2629.130832089549,
+        "y": 1988.0745626329285
+      },
+      "project:numpde/GeneSwitches": {
+        "x": 4117.4558849233235,
+        "y": 914.7332320404221
+      },
+      "project:JosefineRuder/material": {
+        "x": 3531.4348774832047,
+        "y": 708.9017529119477
+      },
+      "project:numpde/geppetto4": {
+        "x": 1317.1757022106212,
+        "y": 2334.9135494820835
+      },
+      "project:numpde/gnn-intro": {
+        "x": 2398.6795057518375,
+        "y": 2246.968583656405
+      },
+      "project:numpde/grimace-factorized": {
+        "x": 1765.2615109991468,
+        "y": 2757.6786679855813
+      },
+      "project:numpde/grimace-py": {
+        "x": 1511.839644810074,
+        "y": 2408.9207666208267
+      },
+      "project:numpde/hello-world": {
+        "x": -2055.2424309929183,
+        "y": 189.80096766876957
+      },
+      "project:numpde/hf": {
+        "x": 1070.7556003298523,
+        "y": 2916.249382464433
+      },
+      "project:numpde/hybrid-crypto-js": {
+        "x": -1226.1420011987561,
+        "y": 738.0753290660213
+      },
+      "project:numpde/ibiocomp": {
+        "x": 3256.765495106108,
+        "y": 639.1605336956817
+      },
+      "project:numpde/id-overlay": {
+        "x": -294.130180041581,
+        "y": -549.3537174875112
+      },
+      "project:numpde/idom": {
+        "x": 993.1300898341701,
+        "y": 384.52651828067366
+      },
+      "project:numpde/inclusive": {
+        "x": 2428.1490251948717,
+        "y": 826.0853763312336
+      },
+      "project:numpde/ip": {
+        "x": 1738.6569768893569,
+        "y": 4716.052102646791
+      },
+      "project:numpde/ipfs-for-text": {
+        "x": 239.24952906198098,
+        "y": 671.3752705480146
+      },
+      "project:numpde/kemukle": {
+        "x": 1058.116830676824,
+        "y": 1814.5648128317314
+      },
+      "project:numpde/fork-of-lark": {
+        "x": -133.3494978134193,
+        "y": 2323.057256698708
+      },
+      "project:numpde/legal-dna-course": {
+        "x": 3045.396051362264,
+        "y": 640.2943527495656
+      },
+      "project:numpde/legal_dna": {
+        "x": 2430.254388961615,
+        "y": 1291.0598169551606
+      },
+      "project:numpde/little_bird": {
+        "x": 462.5457199084371,
+        "y": 128.62632489616863
+      },
+      "project:numpde/fork-of-llama.cpp": {
+        "x": -553.3774173086947,
+        "y": -532.0155430344669
+      },
+      "project:numpde/llm-systemd": {
+        "x": 40.18372513419104,
+        "y": -609.5332287577047
+      },
+      "project:numpde/magnet": {
+        "x": 2198.7513839020594,
+        "y": 2431.6093633846654
+      },
+      "project:numpde/magnet-deploy": {
+        "x": 773.2209602348444,
+        "y": 1257.683585738148
+      },
+      "project:numpde/math-notes": {
+        "x": 3460.251196867501,
+        "y": -946.377196192911
+      },
+      "project:EuRoXy/MC_CMF": {
+        "x": 4024.7251626917587,
+        "y": -460.09641437189384
+      },
+      "project:numpde/fork-of-mediatek-mt7927-dkms": {
+        "x": 1602.6488437249702,
+        "y": 3665.6587555684227
+      },
+      "project:busybus/medium": {
+        "x": 4325.699788336899,
+        "y": 2720.9660321723513
+      },
+      "project:numpde/metamask-test-dapp": {
+        "x": -3029.26705347533,
+        "y": 2559.795535506187
+      },
+      "project:numpde/metered_pipe": {
+        "x": -2125.8013856344096,
+        "y": -345.3003045515271
+      },
+      "project:numpde/minidict": {
+        "x": 1556.713305726971,
+        "y": 224.12320695843349
+      },
+      "project:numpde/misc": {
+        "x": 3367.74947934675,
+        "y": 253.49226007432796
+      },
+      "project:numpde/ml-selfhosted": {
+        "x": 54.557113313086774,
+        "y": -1653.2089270738593
+      },
+      "project:numpde/fork-of-MoLFormer-XL-both-10pct": {
+        "x": 1860.2924211687848,
+        "y": 2486.384855475306
+      },
+      "project:numpde/nct1": {
+        "x": 2785.0960725638897,
+        "y": 1341.628864666739
+      },
+      "project:networkx/networkx": {
+        "x": 2967.470509627753,
+        "y": 1979.5385571751265
+      },
+      "project:numpde/NicheNet_Omnipath": {
+        "x": 2206.3904919544716,
+        "y": 904.3789548710847
+      },
+      "project:numpde/nmr-api-v1": {
+        "x": 1025.969797629502,
+        "y": 1668.0124691445078
+      },
+      "project:numpde/nmr-fl-layer0": {
+        "x": 2477.236236492135,
+        "y": 2884.091240483466
+      },
+      "project:numpde/nmr-gui-v1": {
+        "x": 1175.703423358972,
+        "y": 1428.262391609813
+      },
+      "project:numpde/nmr-msc": {
+        "x": 2160.380535533847,
+        "y": 1723.7674197220429
+      },
+      "project:numpde/nmr-provider-tools": {
+        "x": 830.8224638670025,
+        "y": 1678.2920109259258
+      },
+      "project:numpde/nmr-rules": {
+        "x": 1655.9060643713215,
+        "y": 2019.3322719648747
+      },
+      "project:numpde/nmr-system-test-v1": {
+        "x": 309.60040664694725,
+        "y": 1655.8052963123039
+      },
+      "project:numpde/fork-of-nmr-to-structure": {
+        "x": 1825.9021098141957,
+        "y": 2141.9552470185654
+      },
+      "project:numpde/nmr-to-structure-lite": {
+        "x": 1644.187808404973,
+        "y": 2570.4534487067845
+      },
+      "project:numpde/fork-of-NMR2Struct": {
+        "x": 2164.6205834199495,
+        "y": 2102.771008678796
+      },
+      "project:numpde/nmrnet-repro": {
+        "x": 1375.4508788365122,
+        "y": 1930.434510620677
+      },
+      "project:numpde/fork-of-NMRNetplusplus": {
+        "x": 1973.5932611423113,
+        "y": 2014.8619278034932
+      },
+      "project:numpde/fork-of-NMRPeak": {
+        "x": 1988.3810868958321,
+        "y": 2147.2448020196484
+      },
+      "project:numpde/nmrpeak-repro": {
+        "x": 1534.5594417475193,
+        "y": 1838.6519499740905
+      },
+      "project:numpde/npv-graph": {
+        "x": 1032.2049690686515,
+        "y": 1291.2135330984568
+      },
+      "project:numpde/numpde": {
+        "x": -1042.9542242161756,
+        "y": 2172.6567593867735
+      },
+      "project:numpde/nuSelectable": {
+        "x": -226.48140175966338,
+        "y": -154.88435919229642
+      },
+      "project:szczepinskaa/NYGC": {
+        "x": 3265.377301934311,
+        "y": 941.6305345127283
+      },
+      "project:TDLemonNovecento/ODE_system": {
+        "x": 3085.0910976158407,
+        "y": -856.6831429491006
+      },
+      "project:numpde/openai-build-week-2026-07": {
+        "x": 1407.3943868736296,
+        "y": 1741.1984156082203
+      },
+      "project:numpde/opengsn-relay": {
+        "x": -380.292690144047,
+        "y": -2252.845422519735
+      },
+      "project:OpenNMT/OpenNMT-py": {
+        "x": -905.4335957421353,
+        "y": -405.55131185062476
+      },
+      "project:numpde/opensea": {
+        "x": -1444.9122777148093,
+        "y": 311.1282037416632
+      },
+      "project:numpde/opensea-js": {
+        "x": -1832.2510625861905,
+        "y": 885.6300689343548
+      },
+      "project:numpde/opensea-sdk": {
+        "x": -1976.9837266002232,
+        "y": 417.5645260360135
+      },
+      "project:numpde/opensea-sdk-1": {
+        "x": -1764.5342791352748,
+        "y": 432.64426442376083
+      },
+      "project:numpde/ops-doctor": {
+        "x": 1006.4225642423788,
+        "y": 4519.19654106249
+      },
+      "project:numpde/optimum": {
+        "x": 4940.573245404605,
+        "y": 3080.7204146308586
+      },
+      "project:numpde/orderbooks": {
+        "x": -2056.860319082148,
+        "y": -23.721720738530102
+      },
+      "project:numpde/fork-of-page-assist": {
+        "x": -409.96795701547813,
+        "y": -834.8503136550547
+      },
+      "project:numpde/pai_project1": {
+        "x": 3906.709158427872,
+        "y": -132.60899269532877
+      },
+      "project:numpde/pai_project2": {
+        "x": 4075.2074341709017,
+        "y": -188.27268268478247
+      },
+      "project:numpde/pai_project3": {
+        "x": 3801.3262707604435,
+        "y": 72.14575014861032
+      },
+      "project:numpde/pai_project4": {
+        "x": 4251.292158308605,
+        "y": -38.909516488188004
+      },
+      "project:numpde/pai_summary": {
+        "x": 3700.100006900625,
+        "y": -357.91731636417035
+      },
+      "project:numpde/paper-pdf-tools": {
+        "x": 2302.0498211762692,
+        "y": 3456.9328125156285
+      },
+      "project:numpde/parabolic": {
+        "x": 3202.9583896867293,
+        "y": -1542.175614722464
+      },
+      "project:numpde/pay-to-play": {
+        "x": -3228.6250896758556,
+        "y": 3523.3630018836507
+      },
+      "project:numpde/pay-to-play-wire": {
+        "x": -3345.8794591348146,
+        "y": 3299.6292003697936
+      },
+      "project:numpde/phonepad": {
+        "x": 687.1778469866688,
+        "y": 2639.816991825953
+      },
+      "project:numpde/photoveto": {
+        "x": -1256.3479024056269,
+        "y": 2484.5528058190416
+      },
+      "project:numpde/playground": {
+        "x": 2425.7030877693574,
+        "y": 2528.661514327352
+      },
+      "project:numpde/pledge": {
+        "x": -2837.8490536974687,
+        "y": 2278.7659452865937
+      },
+      "project:numpde/plox": {
+        "x": 912.9213855999285,
+        "y": 26.86769137190798
+      },
+      "project:numpde/plunderbot": {
+        "x": -1635.15342706367,
+        "y": 759.2145011604904
+      },
+      "project:numpde/fork-of-popup-blocker": {
+        "x": -578.770666645529,
+        "y": -1287.6007930200453
+      },
+      "project:numpde/proart-llm": {
+        "x": -205.37301401764958,
+        "y": -1198.2308309023488
+      },
+      "project:numpde/probability_primer": {
+        "x": 3643.988003335376,
+        "y": -661.7178209777534
+      },
+      "project:numpde/protein-pharm": {
+        "x": 2151.360697213029,
+        "y": 508.8376088712794
+      },
+      "project:numpde/protein-pharm-bib": {
+        "x": 1099.4074439556075,
+        "y": 921.7663416481629
+      },
+      "project:numpde/proxy": {
+        "x": -229.00409969595145,
+        "y": -1970.1634297119294
+      },
+      "project:numpde/py-eip712-structs": {
+        "x": -3249.3963517301813,
+        "y": 3060.714049215497
+      },
+      "project:numpde/pyaffy": {
+        "x": 3638.993332477968,
+        "y": 1416.182682091504
+      },
+      "project:numpde/pybrl": {
+        "x": 3849.0263857507834,
+        "y": 2182.048998453657
+      },
+      "project:numpde/python-libsbml": {
+        "x": 1481.023183443225,
+        "y": 2972.3091293291486
+      },
+      "project:microsoft/qsharp-compiler": {
+        "x": 2257.8986290950734,
+        "y": -171.9774555285553
+      },
+      "project:numpde/Quantum": {
+        "x": 2651.6067760619467,
+        "y": -96.21328604584284
+      },
+      "project:numpde/quantum-docs-pr": {
+        "x": 2437.4873740279586,
+        "y": -270.3770581059061
+      },
+      "project:microsoft/QuantumLibraries": {
+        "x": 2272.2693993153785,
+        "y": 176.08996861061843
+      },
+      "project:numpde/r2-crawl": {
+        "x": -1383.6016645968007,
+        "y": 1176.868440429575
+      },
+      "project:numpde/randompile_www": {
+        "x": -697.7692978305558,
+        "y": 2235.0710190612044
+      },
+      "project:numpde/fork-of-rdkit": {
+        "x": 1918.2612110805542,
+        "y": 1510.9968720479983
+      },
+      "project:numpde/reactpy-quiz": {
+        "x": 1392.5658196558174,
+        "y": 939.586581451977
+      },
+      "project:joshstevens19/rindexer": {
+        "x": -2933.933330519459,
+        "y": 3429.027822060071
+      },
+      "project:numpde/fork-of-rindexer": {
+        "x": -2789.844519680914,
+        "y": 3638.256381668905
+      },
+      "project:songlab-cal/rna-sieve": {
+        "x": 3985.614709998628,
+        "y": 1289.7953257268337
+      },
+      "project:numpde/fork-of-ruff": {
+        "x": 27.081449225689514,
+        "y": 3173.1536950955856
+      },
+      "project:numpde/ruffer": {
+        "x": -29.95898744519762,
+        "y": 3667.441471229192
+      },
+      "project:Ndaraya23/Saddle": {
+        "x": -365.57431821864066,
+        "y": 2068.347725814797
+      },
+      "project:numpde/safe-codex": {
+        "x": 522.2200123669562,
+        "y": 4209.57955053694
+      },
+      "project:numpde/sci-parser": {
+        "x": -823.0001345252681,
+        "y": 342.91395528038106
+      },
+      "project:asrhou/scMatch": {
+        "x": 3746.6383269093353,
+        "y": 1214.7777634716947
+      },
+      "project:numpde/fork-of-secs-app": {
+        "x": 845.601062809339,
+        "y": 1965.7654981702183
+      },
+      "project:numpde/fork-of-secs": {
+        "x": 2040.5330650279732,
+        "y": 2283.076378483614
+      },
+      "project:numpde/secs-repro": {
+        "x": 1094.4127883330746,
+        "y": 2134.2987452174516
+      },
+      "project:numpde/shared": {
+        "x": 2545.729035974051,
+        "y": 501.32465859512
+      },
+      "project:numpde/skills": {
+        "x": 204.1699323302854,
+        "y": 3626.179751801392
+      },
+      "project:numpde/slt_script": {
+        "x": 3441.548849049088,
+        "y": -283.11727934174
+      },
+      "project:numpde/fork-of-smirk": {
+        "x": 1162.9443146499589,
+        "y": 2571.6988126991773
+      },
+      "project:numpde/sode2nd": {
+        "x": 3378.509792680233,
+        "y": -1773.520350617317
+      },
+      "project:numpde/solidity-by-example.github.io": {
+        "x": -2716.125522480086,
+        "y": 2459.311478389893
+      },
+      "project:numpde/sorcery": {
+        "x": -1471.9812925907268,
+        "y": -98.1667773293817
+      },
+      "project:numpde/speakers": {
+        "x": 893.3217864403722,
+        "y": 2613.853391055956
+      },
+      "project:numpde/fork-of-multimodal-spectroscopic-dataset": {
+        "x": 1730.4014772570674,
+        "y": 2315.1545697985057
+      },
+      "project:numpde/sta426": {
+        "x": 3571.3782473943993,
+        "y": 581.6236626274475
+      },
+      "project:numpde/sta426_deconvo": {
+        "x": 3885.337637206181,
+        "y": 855.0940775983881
+      },
+      "project:numpde/talk-spacetime-rk": {
+        "x": 3123.5017321723426,
+        "y": -1139.8137048917297
+      },
+      "project:numpde/tcga": {
+        "x": 3231.3741223036086,
+        "y": 1524.648325307588
+      },
+      "project:numpde/teaching": {
+        "x": 3136.237178551785,
+        "y": -519.0197397921316
+      },
+      "project:numpde/test-circular-capital": {
+        "x": -962.7165070365107,
+        "y": 1543.8240779972573
+      },
+      "project:numpde/test-django-clone": {
+        "x": -925.5811085735262,
+        "y": 2671.6354397164564
+      },
+      "project:numpde/tg-box-reporter": {
+        "x": 1610.7294418179592,
+        "y": 4921.213319795928
+      },
+      "project:numpde/tg-login-test": {
+        "x": -720.8917122257939,
+        "y": 2977.9777898855596
+      },
+      "project:numpde/the-dark-side": {
+        "x": 4576.595512841033,
+        "y": 3530.8841159757385
+      },
+      "project:numpde/threadop": {
+        "x": -1792.9350115112575,
+        "y": -372.89548420257347
+      },
+      "project:OpenNMT/Tokenizer": {
+        "x": 458.4448647990158,
+        "y": 2524.6375646116426
+      },
+      "project:numpde/traefik-agentic": {
+        "x": 149.45927995811985,
+        "y": -2129.3904568567627
+      },
+      "project:numpde/traefik-nmr-api": {
+        "x": 33.05416002777796,
+        "y": -1970.8729479445963
+      },
+      "project:numpde/traefik-vote-mcp": {
+        "x": 299.9892747335557,
+        "y": -1950.5561646112913
+      },
+      "project:numpde/translations": {
+        "x": 3330.5454385475937,
+        "y": -773.4730414134544
+      },
+      "project:numpde/transport": {
+        "x": 4647.231033496591,
+        "y": 3227.8592421746334
+      },
+      "project:numpde/TTS": {
+        "x": -917.649446393182,
+        "y": -75.82557547420028
+      },
+      "project:numpde/twig": {
+        "x": 1099.1869300553767,
+        "y": -104.7887999605673
+      },
+      "project:numpde/unsplashy": {
+        "x": 302.6435109475083,
+        "y": 1984.5899155331797
+      },
+      "project:numpde/utilities": {
+        "x": 2038.7865635538153,
+        "y": 4183.353302308308
+      },
+      "project:alejox10/Verybusybus": {
+        "x": 4690.120921615786,
+        "y": 3008.0461736330294
+      },
+      "project:numpde/vidiai": {
+        "x": 159.91599821577893,
+        "y": 2682.594772744681
+      },
+      "project:numpde/vote-gui": {
+        "x": -532.8684285099281,
+        "y": 649.3510227061449
+      },
+      "project:numpde/vote-mcp": {
+        "x": -786.5682044891665,
+        "y": 778.3298707955826
+      },
+      "project:numpde/wemake-python-styleguide": {
+        "x": -200.13130672784956,
+        "y": 2836.3729083036123
+      },
+      "project:numpde/wyvern-schemas": {
+        "x": -2213.0518721981257,
+        "y": 1470.1380633823003
+      },
+      "project:numpde/yaz-proxy": {
+        "x": 317.2623594145543,
+        "y": 1009.914253293744
+      }
+    },
+    "viewport": {
+      "width": 720,
+      "height": 841,
+      "zoom": 0.07709319147437925,
+      "pan": {
+        "x": 324.850605352669,
+        "y": 317.66191283867215
+      }
+    }
+  },
+  "curated": {
+    "positions": {
+      "project:busybus/2017": {
+        "x": 3239.435185444747,
+        "y": -1122.1274667191815
+      },
+      "project:numpde/about": {
+        "x": 1276.754439596403,
+        "y": 2267.341157964687
+      },
+      "project:numpde/agent-mail": {
+        "x": 368.60860842783796,
+        "y": 46.24442883233588
+      },
+      "project:numpde/alg2mfg": {
+        "x": 2197.7070882736807,
+        "y": -483.97447543055296
+      },
+      "project:numpde/aliz": {
+        "x": 2813.018699976458,
+        "y": -825.7570552922414
+      },
+      "project:numpde/als1": {
+        "x": 3634.401536016695,
+        "y": 2875.9529747914853
+      },
+      "project:numpde/als1_report": {
+        "x": 3795.343429784342,
+        "y": 2687.1382386146397
+      },
+      "project:numpde/als2": {
+        "x": 3399.9617164412407,
+        "y": 3330.793409790176
+      },
+      "project:numpde/als2_qichang": {
+        "x": 2856.00832037234,
+        "y": 3286.2086642107683
+      },
+      "project:numpde/as": {
+        "x": 3065.775216179529,
+        "y": 2325.2049389854587
+      },
+      "project:numpde/ask_openai": {
+        "x": 1356.9775943274062,
+        "y": 2830.558645333499
+      },
+      "project:numpde/authz-core": {
+        "x": -949.5388527423208,
+        "y": 2669.675004818139
+      },
+      "project:numpde/auto-cleanup": {
+        "x": -10.225152272422184,
+        "y": 3352.0960491562405
+      },
+      "project:numpde/banksy": {
+        "x": -571.1861467146925,
+        "y": 2622.4543750912753
+      },
+      "project:lhl/batterylog": {
+        "x": -1826.944301727473,
+        "y": 3876.881073147135
+      },
+      "project:numpde/best-practices": {
+        "x": 1278.4604822508568,
+        "y": 1995.5904196244223
+      },
+      "project:numpde/bike-nft": {
+        "x": -422.9568094666083,
+        "y": 2820.3715723715495
+      },
+      "project:numpde/biohire": {
+        "x": 1809.0248423074365,
+        "y": -819.4865843785913
+      },
+      "project:numpde/biorxiv-digest": {
+        "x": 1110.340149013502,
+        "y": -107.37774854354062
+      },
+      "project:numpde/bolt-spec-v0": {
+        "x": -77.28676855481073,
+        "y": -1667.0476151652
+      },
+      "project:numpde/bolt-spec-v0-pages": {
+        "x": -34.04866197269853,
+        "y": -1553.276136226645
+      },
+      "project:numpde/bolt-spec-v1": {
+        "x": 336.2252610291583,
+        "y": -1548.805298474317
+      },
+      "project:numpde/bolts-demand": {
+        "x": -259.40286451855775,
+        "y": -1357.6400819719615
+      },
+      "project:numpde/bugs": {
+        "x": -1165.3548572554203,
+        "y": 3699.2345573040047
+      },
+      "project:numpde/cannondale-nft": {
+        "x": -362.43838754625847,
+        "y": 2596.689727541688
+      },
+      "project:numpde/cbb": {
+        "x": 2685.834813452715,
+        "y": 3060.20903185948
+      },
+      "project:numpde/chemrxiv-data": {
+        "x": 797.5791277005284,
+        "y": 583.1744094729122
+      },
+      "project:numpde/fork-of-codex": {
+        "x": 626.7296994727875,
+        "y": 2361.173890575974
+      },
+      "project:numpde/Team03": {
+        "x": 2465.2683253303767,
+        "y": 2752.5285584933226
+      },
+      "project:numpde/conda-tools": {
+        "x": 173.3456432624743,
+        "y": 1620.3462842459903
+      },
+      "project:numpde/conix": {
+        "x": -943.2636623832054,
+        "y": 1829.0629553414633
+      },
+      "project:numpde/fork-of-Consent-O-Matic": {
+        "x": -537.2518465551703,
+        "y": 3152.341235190951
+      },
+      "project:numpde/container-tools": {
+        "x": 53.56783054290876,
+        "y": 2500.0815836210095
+      },
+      "project:duspic/corrupt_json": {
+        "x": 1980.6118287097174,
+        "y": 2509.655146288055
+      },
+      "project:numpde/CortexCellDeconv": {
+        "x": 4050.7073848353775,
+        "y": 2934.8069283227824
+      },
+      "project:numpde/counter-resistance": {
+        "x": 548.1641308973416,
+        "y": 223.54353666041533
+      },
+      "project:numpde/crawler-action": {
+        "x": -324.1452749551492,
+        "y": -34.29594823533462
+      },
+      "project:numpde/dapp32": {
+        "x": -341.4848247001885,
+        "y": 2233.7086005463966
+      },
+      "project:numpde/disable-workspace-switcher-popup": {
+        "x": 403.5706497746229,
+        "y": 3257.0719504038275
+      },
+      "project:numpde/django-siam-db": {
+        "x": 898.9590902684522,
+        "y": -227.96520635593245
+      },
+      "project:numpde/downloader": {
+        "x": -474.10513201767594,
+        "y": 184.78027385313126
+      },
+      "project:numpde/dummy": {
+        "x": 689.2958205288475,
+        "y": 3254.3654719299307
+      },
+      "project:numpde/ecommerce": {
+        "x": -775.6569511360746,
+        "y": -482.2220986519977
+      },
+      "project:numpde/fork-of-elucidation.cheminfo.org": {
+        "x": 252.11708593799375,
+        "y": 440.88357828507424
+      },
+      "project:numpde/errata": {
+        "x": 1807.5359369666558,
+        "y": 443.98128014019005
+      },
+      "project:numpde/euler": {
+        "x": 1828.7833201640371,
+        "y": -57.8779407280844
+      },
+      "project:numpde/EWCE": {
+        "x": 3587.6681065035473,
+        "y": 3164.5805601950015
+      },
+      "project:numpde/ewceData": {
+        "x": 3868.843149928779,
+        "y": 3287.256457184841
+      },
+      "project:numpde/fork-of-farm_molecular_representation": {
+        "x": 2159.172345669807,
+        "y": 1229.3557896244756
+      },
+      "project:numpde/geepee": {
+        "x": 3029.106910441629,
+        "y": -1012.8983487567962
+      },
+      "project:numpde/genesets": {
+        "x": 898.3711930123147,
+        "y": 2002.7843302736107
+      },
+      "project:numpde/GeneSwitches": {
+        "x": 3964.8493178304666,
+        "y": 2805.932640715219
+      },
+      "project:JosefineRuder/material": {
+        "x": 3368.9368859239876,
+        "y": 2873.65997526095
+      },
+      "project:numpde/geppetto4": {
+        "x": 1302.6312794101168,
+        "y": 2509.156598490796
+      },
+      "project:numpde/gnn-intro": {
+        "x": 2605.0640638501914,
+        "y": 1503.0639506354148
+      },
+      "project:numpde/grimace-factorized": {
+        "x": 2080.2304580275663,
+        "y": 735.7014242773241
+      },
+      "project:numpde/grimace-py": {
+        "x": 1319.5765843725212,
+        "y": 1293.8111174559358
+      },
+      "project:numpde/hello-world": {
+        "x": -158.18114800499717,
+        "y": 173.83398575875879
+      },
+      "project:numpde/hf": {
+        "x": 2047.0655650316821,
+        "y": 1850.841892118361
+      },
+      "project:numpde/hybrid-crypto-js": {
+        "x": 200.52378789454167,
+        "y": -418.47864693004163
+      },
+      "project:numpde/ibiocomp": {
+        "x": 1623.4214108050442,
+        "y": 2275.6577818164324
+      },
+      "project:numpde/id-overlay": {
+        "x": 1819.7014325942105,
+        "y": -1092.0297179466631
+      },
+      "project:numpde/idom": {
+        "x": -299.4572458696417,
+        "y": 1777.3774788332314
+      },
+      "project:numpde/inclusive": {
+        "x": -1199.2124432678434,
+        "y": 2764.375199912736
+      },
+      "project:numpde/ip": {
+        "x": -1639.8695602364367,
+        "y": 4046.046020852166
+      },
+      "project:numpde/ipfs-for-text": {
+        "x": -69.2578264680917,
+        "y": 2313.046824101389
+      },
+      "project:numpde/kemukle": {
+        "x": 766.4771369843252,
+        "y": 443.70859087128656
+      },
+      "project:numpde/fork-of-lark": {
+        "x": 2390.7843320155157,
+        "y": 2572.665810595625
+      },
+      "project:numpde/legal-dna-course": {
+        "x": 2445.180187639847,
+        "y": 1260.6949643631765
+      },
+      "project:numpde/legal_dna": {
+        "x": 1813.784667982036,
+        "y": 1569.9810034612829
+      },
+      "project:numpde/little_bird": {
+        "x": -1724.9817858830033,
+        "y": 3643.385767103
+      },
+      "project:numpde/fork-of-llama.cpp": {
+        "x": 351.72853695116066,
+        "y": 1987.9134704958046
+      },
+      "project:numpde/llm-systemd": {
+        "x": -283.68278120215393,
+        "y": 1343.7776426303064
+      },
+      "project:numpde/magnet": {
+        "x": 1538.9374098416827,
+        "y": 923.3349371749534
+      },
+      "project:numpde/magnet-deploy": {
+        "x": 279.03575347653367,
+        "y": 1104.2454660507617
+      },
+      "project:numpde/math-notes": {
+        "x": 2746.8718658127686,
+        "y": -181.13340714840916
+      },
+      "project:EuRoXy/MC_CMF": {
+        "x": 3619.385050986037,
+        "y": -170.57824681797308
+      },
+      "project:numpde/fork-of-mediatek-mt7927-dkms": {
+        "x": -259.80275993098473,
+        "y": 1984.4058340493873
+      },
+      "project:busybus/medium": {
+        "x": 2234.245181410074,
+        "y": -1416.3822818609515
+      },
+      "project:numpde/metamask-test-dapp": {
+        "x": -995.0693757624981,
+        "y": 2186.304562435275
+      },
+      "project:numpde/metered_pipe": {
+        "x": -2021.4514901839232,
+        "y": 3542.964654760675
+      },
+      "project:numpde/minidict": {
+        "x": -1107.6816533773383,
+        "y": 3270.9937284533594
+      },
+      "project:numpde/misc": {
+        "x": 4003.30100715198,
+        "y": 720.7915181707314
+      },
+      "project:numpde/ml-selfhosted": {
+        "x": -761.2143338877775,
+        "y": 1067.7019017785965
+      },
+      "project:numpde/fork-of-MoLFormer-XL-both-10pct": {
+        "x": 1958.5188493965195,
+        "y": 1038.3740657792432
+      },
+      "project:numpde/nct1": {
+        "x": 3382.8475315231813,
+        "y": 783.5604971585149
+      },
+      "project:networkx/networkx": {
+        "x": 2209.9260374617215,
+        "y": 213.7038004700842
+      },
+      "project:numpde/NicheNet_Omnipath": {
+        "x": 3226.0011218501677,
+        "y": 2177.1024927590706
+      },
+      "project:numpde/nmr-api-v1": {
+        "x": 49.60435062652255,
+        "y": 622.465746217793
+      },
+      "project:numpde/nmr-fl-layer0": {
+        "x": 221.06293759175352,
+        "y": -189.27026999668817
+      },
+      "project:numpde/nmr-gui-v1": {
+        "x": 107.72137821060201,
+        "y": 913.3883439450511
+      },
+      "project:numpde/nmr-msc": {
+        "x": 1574.453365253115,
+        "y": 674.9592983514666
+      },
+      "project:numpde/nmr-provider-tools": {
+        "x": -186.0595938702186,
+        "y": 548.109925823129
+      },
+      "project:numpde/nmr-rules": {
+        "x": 946.6018196303854,
+        "y": 1104.5797655059791
+      },
+      "project:numpde/nmr-system-test-v1": {
+        "x": -523.9007188310248,
+        "y": 673.623925211098
+      },
+      "project:numpde/fork-of-nmr-to-structure": {
+        "x": 1357.0075256237194,
+        "y": 761.4502793844924
+      },
+      "project:numpde/nmr-to-structure-lite": {
+        "x": 1463.831782417936,
+        "y": 1081.0433711160315
+      },
+      "project:numpde/fork-of-NMR2Struct": {
+        "x": 1093.9161817073914,
+        "y": 817.1046020542785
+      },
+      "project:numpde/nmrnet-repro": {
+        "x": 999.3754912565828,
+        "y": 372.6845712548188
+      },
+      "project:numpde/fork-of-NMRNetplusplus": {
+        "x": 1308.4189953581506,
+        "y": 487.8021735036198
+      },
+      "project:numpde/fork-of-NMRPeak": {
+        "x": 1075.6724185771182,
+        "y": 657.6538902229338
+      },
+      "project:numpde/nmrpeak-repro": {
+        "x": 495.6146205016125,
+        "y": 814.8705111258464
+      },
+      "project:numpde/npv-graph": {
+        "x": 2402.3884600021033,
+        "y": -211.94624436223256
+      },
+      "project:numpde/numpde": {
+        "x": 1552.2277105622175,
+        "y": 1482.8637992144374
+      },
+      "project:numpde/nuSelectable": {
+        "x": 1982.4573121110316,
+        "y": 19.59591906480474
+      },
+      "project:szczepinskaa/NYGC": {
+        "x": 3702.4977919960074,
+        "y": 3381.616984801199
+      },
+      "project:TDLemonNovecento/ODE_system": {
+        "x": 3023.714381060435,
+        "y": 1347.9063365964448
+      },
+      "project:numpde/openai-build-week-2026-07": {
+        "x": 449.9056501480408,
+        "y": 615.4559342712973
+      },
+      "project:numpde/opengsn-relay": {
+        "x": -709.3494611084533,
+        "y": 2353.1345301044803
+      },
+      "project:OpenNMT/OpenNMT-py": {
+        "x": 1449.1282343424953,
+        "y": 48.47065537193906
+      },
+      "project:numpde/opensea": {
+        "x": -1908.7145471331337,
+        "y": 3314.4944785702196
+      },
+      "project:numpde/opensea-js": {
+        "x": -1651.202824060616,
+        "y": 2354.576266793716
+      },
+      "project:numpde/opensea-sdk": {
+        "x": -1891.2386188444493,
+        "y": 2876.8941228905
+      },
+      "project:numpde/opensea-sdk-1": {
+        "x": -1649.6357501739883,
+        "y": 2854.8733060445156
+      },
+      "project:numpde/ops-doctor": {
+        "x": 554.5558957020867,
+        "y": 3129.747424940946
+      },
+      "project:numpde/optimum": {
+        "x": 2896.4731951641147,
+        "y": -1157.1413187097132
+      },
+      "project:numpde/orderbooks": {
+        "x": -1943.6568318979603,
+        "y": 3082.4213763759312
+      },
+      "project:numpde/fork-of-page-assist": {
+        "x": -373.2901629815655,
+        "y": 1128.7530995774248
+      },
+      "project:numpde/pai_project1": {
+        "x": 3427.65036015602,
+        "y": -484.771293372863
+      },
+      "project:numpde/pai_project2": {
+        "x": 3138.9876850996693,
+        "y": -456.5112201006535
+      },
+      "project:numpde/pai_project3": {
+        "x": 2606.011142569719,
+        "y": -260.08706351263515
+      },
+      "project:numpde/pai_project4": {
+        "x": 3195.504643803363,
+        "y": -778.0483106372827
+      },
+      "project:numpde/pai_summary": {
+        "x": 3453.1133809212924,
+        "y": -87.3561813638802
+      },
+      "project:numpde/paper-pdf-tools": {
+        "x": 960.006983242348,
+        "y": -82.5533102004028
+      },
+      "project:numpde/parabolic": {
+        "x": 2520.030567094359,
+        "y": 197.0610026451586
+      },
+      "project:numpde/pay-to-play": {
+        "x": -1085.6783468626757,
+        "y": 2384.6583813907714
+      },
+      "project:numpde/pay-to-play-wire": {
+        "x": -1044.6499267939132,
+        "y": 2514.2345532628456
+      },
+      "project:numpde/phonepad": {
+        "x": 1587.8211450323706,
+        "y": -362.9235128542604
+      },
+      "project:numpde/photoveto": {
+        "x": -380.9637174345944,
+        "y": 3298.8183914373644
+      },
+      "project:numpde/playground": {
+        "x": 886.2878928002334,
+        "y": -710.3168193632254
+      },
+      "project:numpde/pledge": {
+        "x": -804.2966769822909,
+        "y": 2472.9050201326218
+      },
+      "project:numpde/plox": {
+        "x": 3557.3300926482484,
+        "y": 490.8668754667021
+      },
+      "project:numpde/plunderbot": {
+        "x": -2203.823921533815,
+        "y": 2988.246835986243
+      },
+      "project:numpde/fork-of-popup-blocker": {
+        "x": 87.05236081099731,
+        "y": 3203.696597423423
+      },
+      "project:numpde/proart-llm": {
+        "x": -477.825314896793,
+        "y": 1434.2871024495435
+      },
+      "project:numpde/probability_primer": {
+        "x": 2978.520796909695,
+        "y": 387.1547538020278
+      },
+      "project:numpde/protein-pharm": {
+        "x": 1912.5175647630554,
+        "y": 200.98912860997078
+      },
+      "project:numpde/protein-pharm-bib": {
+        "x": 1372.2285525298796,
+        "y": -338.84421018168234
+      },
+      "project:numpde/proxy": {
+        "x": -975.7929959976163,
+        "y": 631.2997593185743
+      },
+      "project:numpde/py-eip712-structs": {
+        "x": -1225.6432226138731,
+        "y": 2060.0887980359726
+      },
+      "project:numpde/pyaffy": {
+        "x": 3021.1415227297766,
+        "y": 3082.321501801898
+      },
+      "project:numpde/pybrl": {
+        "x": 2025.8062728103464,
+        "y": -588.285666672424
+      },
+      "project:numpde/python-libsbml": {
+        "x": 2426.9020535415552,
+        "y": 1864.9230548860855
+      },
+      "project:microsoft/qsharp-compiler": {
+        "x": 3745.809967134958,
+        "y": 1669.4192014878545
+      },
+      "project:numpde/Quantum": {
+        "x": 4158.332143902811,
+        "y": 1445.487745660353
+      },
+      "project:numpde/quantum-docs-pr": {
+        "x": 4023.37636048488,
+        "y": 1215.0023899137498
+      },
+      "project:microsoft/QuantumLibraries": {
+        "x": 4208.080899425033,
+        "y": 1196.0300166381783
+      },
+      "project:numpde/r2-crawl": {
+        "x": -651.1382298447642,
+        "y": -327.47362535023996
+      },
+      "project:numpde/randompile_www": {
+        "x": 953.5209148129829,
+        "y": 2960.6052236526225
+      },
+      "project:numpde/fork-of-rdkit": {
+        "x": 901.3252485554814,
+        "y": 869.9808414605438
+      },
+      "project:numpde/reactpy-quiz": {
+        "x": -112.77793154328745,
+        "y": 1348.9506419219802
+      },
+      "project:joshstevens19/rindexer": {
+        "x": -767.5658835581294,
+        "y": 1583.4453296445602
+      },
+      "project:numpde/fork-of-rindexer": {
+        "x": -1329.9942911296152,
+        "y": 2323.594360302251
+      },
+      "project:songlab-cal/rna-sieve": {
+        "x": 3977.3635036504866,
+        "y": 3157.387008483686
+      },
+      "project:numpde/fork-of-ruff": {
+        "x": 1727.9553448231543,
+        "y": 3230.5333504206565
+      },
+      "project:numpde/ruffer": {
+        "x": 1027.4442551302654,
+        "y": 3275.4155547236737
+      },
+      "project:Ndaraya23/Saddle": {
+        "x": 557.6271452645108,
+        "y": 3473.243644038365
+      },
+      "project:numpde/safe-codex": {
+        "x": 602.7296449390203,
+        "y": 2912.969255990721
+      },
+      "project:numpde/sci-parser": {
+        "x": 1478.813384556324,
+        "y": 2702.234412218827
+      },
+      "project:asrhou/scMatch": {
+        "x": 3851.2659545939314,
+        "y": 3039.378087167156
+      },
+      "project:numpde/fork-of-secs-app": {
+        "x": -50.580863534598976,
+        "y": 379.18477840516675
+      },
+      "project:numpde/fork-of-secs": {
+        "x": 733.6534910663134,
+        "y": 721.0235492538939
+      },
+      "project:numpde/secs-repro": {
+        "x": 234.28825479721053,
+        "y": 590.4539959853868
+      },
+      "project:numpde/shared": {
+        "x": 1853.6726254257003,
+        "y": 716.1417762727084
+      },
+      "project:numpde/skills": {
+        "x": 940.4250118443997,
+        "y": 2445.750340658165
+      },
+      "project:numpde/slt_script": {
+        "x": 3710.833941252161,
+        "y": -363.54059474734356
+      },
+      "project:numpde/fork-of-smirk": {
+        "x": 1707.079722425839,
+        "y": 860.631476873629
+      },
+      "project:numpde/sode2nd": {
+        "x": 3378.536844008057,
+        "y": 193.38995605984198
+      },
+      "project:numpde/solidity-by-example.github.io": {
+        "x": -765.4742239116928,
+        "y": 2224.5685924698555
+      },
+      "project:numpde/sorcery": {
+        "x": 2010.125450795292,
+        "y": 3164.0928372940816
+      },
+      "project:numpde/speakers": {
+        "x": 2147.9227712139673,
+        "y": 2794.602143125484
+      },
+      "project:numpde/fork-of-multimodal-spectroscopic-dataset": {
+        "x": 1207.4808359459018,
+        "y": 959.838324409279
+      },
+      "project:numpde/sta426": {
+        "x": 2959.8805106910104,
+        "y": 2810.681919856401
+      },
+      "project:numpde/sta426_deconvo": {
+        "x": 3515.50146124068,
+        "y": 2665.63786144105
+      },
+      "project:numpde/talk-spacetime-rk": {
+        "x": 2988.8829633287114,
+        "y": 83.75507238549436
+      },
+      "project:numpde/tcga": {
+        "x": 2351.7337659659984,
+        "y": 2889.7784455543724
+      },
+      "project:numpde/teaching": {
+        "x": 2582.0914712703548,
+        "y": -80.63989102981105
+      },
+      "project:numpde/test-circular-capital": {
+        "x": 2317.8602079332845,
+        "y": -999.2172377758435
+      },
+      "project:numpde/test-django-clone": {
+        "x": 1597.5314469949094,
+        "y": -129.5452911696624
+      },
+      "project:numpde/tg-box-reporter": {
+        "x": -1371.7065759273064,
+        "y": 3844.9202357195886
+      },
+      "project:numpde/tg-login-test": {
+        "x": -1375.564623373421,
+        "y": 1874.4371286667838
+      },
+      "project:numpde/the-dark-side": {
+        "x": 2544.0047055337996,
+        "y": -913.8881827131137
+      },
+      "project:numpde/threadop": {
+        "x": 1739.5462546405504,
+        "y": 3034.320958311911
+      },
+      "project:OpenNMT/Tokenizer": {
+        "x": 1615.8834776282904,
+        "y": 394.03875738941304
+      },
+      "project:numpde/traefik-agentic": {
+        "x": -1473.0366061160084,
+        "y": 1185.7971040616787
+      },
+      "project:numpde/traefik-nmr-api": {
+        "x": -1344.086053070336,
+        "y": 837.511525681316
+      },
+      "project:numpde/traefik-vote-mcp": {
+        "x": -1675.8969110190808,
+        "y": 942.2077442947926
+      },
+      "project:numpde/translations": {
+        "x": 2465.9316632425202,
+        "y": -464.25141101006164
+      },
+      "project:numpde/transport": {
+        "x": 2680.1080994854487,
+        "y": -1363.9577255330503
+      },
+      "project:numpde/TTS": {
+        "x": 1140.700279911198,
+        "y": -737.4269123495535
+      },
+      "project:numpde/twig": {
+        "x": -1224.345876176656,
+        "y": 3987.693096052863
+      },
+      "project:numpde/unsplashy": {
+        "x": 72.5674059326748,
+        "y": 3596.986534515146
+      },
+      "project:numpde/utilities": {
+        "x": 105.17334317777141,
+        "y": 2089.1921973873696
+      },
+      "project:alejox10/Verybusybus": {
+        "x": 2938.0554180345034,
+        "y": -1493.6683228835718
+      },
+      "project:numpde/vidiai": {
+        "x": 959.95518452371,
+        "y": -998.3076373948422
+      },
+      "project:numpde/vote-gui": {
+        "x": 348.432262052995,
+        "y": -617.2754809677097
+      },
+      "project:numpde/vote-mcp": {
+        "x": 644.7861036625758,
+        "y": -310.3591457062758
+      },
+      "project:numpde/wemake-python-styleguide": {
+        "x": 1601.5346822294518,
+        "y": 3460.5514083376092
+      },
+      "project:numpde/wyvern-schemas": {
+        "x": -1529.6127259577997,
+        "y": 2527.801876200743
+      },
+      "project:numpde/yaz-proxy": {
+        "x": 1076.597211656134,
+        "y": -407.9662635591243
+      }
+    },
+    "viewport": {
+      "width": 720,
+      "height": 841,
+      "zoom": 0.07709319147437925,
+      "pan": {
+        "x": 324.850605352669,
+        "y": 317.66191283867215
+      }
+    }
+  }
+}

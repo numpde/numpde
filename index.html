@@ -83,7 +83,7 @@
   </style>
   <script src="assets/vendor/cytoscape-3.34.4.min.js"></script>
   <script src="assets/graph-controls.js?v=f9ee45a1da7f"></script>
-  <script src="assets/graph-fisheye.js?v=67d66db7a1c2"></script>
+  <script src="assets/graph-fisheye.js?v=8ec595ceca69"></script>
 </head>
 <body>
   <main id="graph" tabindex="0" aria-label="Projects" aria-busy="true"></main>
@@ -645,10 +645,12 @@
         throw new Error('Choose view=curated or view=embedded.');
       }
       updateViewToggle(view);
-      const [inventory, map] = await Promise.all([
+      const [inventory, map, layouts] = await Promise.all([
         loadJSON('data/repos.json'),
-        loadJSON('data/neighborhoods.json')
+        loadJSON('data/neighborhoods.json'),
+        loadJSON('data/layouts.json')
       ]);
+      const savedLayout = layouts[view];
       inventoryData = inventory;
       embeddedMap = map;
       currentView = view;
@@ -667,7 +669,8 @@
       const elements = inventory.projects.map(project => {
         const label = project.name;
         const representative = inventory.repositories.find(repo => repo.id === project.repository_ids[0]);
-        return { data: { id: project.id, label, url: representative.url, labelWidth: Math.ceil(measure.measureText(label).width),
+        return { position: savedLayout?.positions[project.id],
+          data: { id: project.id, label, url: representative.url, labelWidth: Math.ceil(measure.measureText(label).width),
           width: Math.ceil(measure.measureText(label).width), height: 16, padding: 9,
           color: '#bac5cf', borderStyle: 'solid', selectionStrength: 0 } };
       });
@@ -742,7 +745,18 @@
         switchView(link.dataset.view);
       }));
       addEventListener('popstate', () => switchView(new URLSearchParams(location.search).get('view') ?? 'embedded', true));
-      arrangeGraph(true);
+      if (savedLayout) {
+        const camera = savedLayout.viewport;
+        const scale = Math.min(cy.width() / camera.width, cy.height() / camera.height);
+        cy.viewport({ zoom: camera.zoom * scale, pan: {
+          x: cy.width() / 2 + (camera.pan.x - camera.width / 2) * scale,
+          y: cy.height() / 2 + (camera.pan.y - camera.height / 2) * scale
+        } });
+        graph.setAttribute('aria-busy', 'false');
+        document.getElementById('controls').inert = false;
+        document.getElementById('views').inert = false;
+        startLiveLayout();
+      } else arrangeGraph(true);
     }
 
     initialize();
