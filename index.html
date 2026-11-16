@@ -85,6 +85,9 @@
       #controls { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px; }
       #views { flex-direction: column; gap: 6px; }
     }
+    @media (hover: none) and (pointer: coarse) {
+      #node-info { width: min(320px, calc(100vw - 24px)); font-size: 12px; }
+    }
   </style>
   <script src="assets/vendor/cytoscape-3.34.4.min.js"></script>
   <script src="assets/graph-controls.js?v=dcf15a4173ad"></script>
