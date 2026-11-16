@@ -68,6 +68,13 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
   populate(sizeSelect, sizeModes, 'size');
 
   const groups = [];
+  function edgeCount(key, value) {
+    return cy.edges().filter(edge => {
+      if (key === 'rules') return edge.data(value === 'cutoff' ? 'withinCutoff' : 'nearest');
+      if (key === 'types') return edge.data('type') === value;
+      return edge.data('claims').some(claim => claim[key] === value);
+    }).length;
+  }
   function checklist(key, heading, choices, { actions = false } = {}) {
     const fieldset = document.createElement('fieldset');
     const headingElement = document.createElement('legend');
@@ -97,7 +104,10 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
       input.type = 'checkbox'; input.name = key; input.value = choice.value;
       input.checked = selected.has(choice.value);
       input.addEventListener('change', () => filterEdges());
-      label.append(input, document.createTextNode(choice.label));
+      const count = document.createElement('span');
+      count.className = 'edge-count';
+      count.textContent = edgeCount(key, choice.value).toLocaleString();
+      label.append(input, document.createTextNode(choice.label), count);
       fieldset.append(label); group.inputs.push(input);
     }
     edgeOptions.append(fieldset); groups.push(group);
@@ -278,7 +288,6 @@ function attachGraphControls({ cy, inventory, embedded, onGraphChange }) {
     });
     updateConnections();
     applyAppearance();
-    document.getElementById('edge-summary').textContent = `Include edges · ${cy.edges().not('.filtered-out').length}/${cy.edges().length}`;
     writeURL();
     if (!initial) onGraphChange({ resize: sizeSelect.value === 'connections', edgesChanged: true });
   }
