@@ -15,12 +15,15 @@
     #graph[aria-busy="true"] { visibility: hidden; }
     #graph:focus-visible { box-shadow: inset 0 0 0 2px var(--accent); }
     #views { position: fixed; z-index: 10; top: 12px; right: 12px; display: flex; gap: 4px; }
-    #views a { display: grid; place-items: center; width: 44px; height: 44px;
+    #views a, #views button { display: grid; place-items: center; width: 44px; height: 44px;
       color: var(--muted); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
-    #views a[aria-current="page"] { color: var(--accent); background: var(--raised); border-color: var(--accent); }
-    #views a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    #views button { padding: 0; cursor: pointer; }
+    #views button:disabled { opacity: .4; cursor: default; }
+    #views a[aria-current="page"], #views button[aria-pressed="true"] {
+      color: var(--accent); background: var(--raised); border-color: var(--accent); }
+    #views a:focus-visible, #views button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     #views svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.6; }
-    #controls { position: fixed; z-index: 10; top: 12px; left: 12px; width: min(650px, calc(100% - 120px));
+    #controls { position: fixed; z-index: 10; top: 12px; left: 12px; width: min(650px, calc(100% - 172px));
       display: grid; grid-template-columns: 1fr 1fr 1.15fr auto; align-items: end; gap: 8px;
       font: 12px system-ui, sans-serif; color: var(--text); }
     #controls > label { display: grid; gap: 4px; min-width: 0; }
@@ -60,6 +63,9 @@
     #node-info.dragging strong { cursor: grabbing; }
     #node-info button { position: absolute; right: 8px; top: 6px; border: 0;
       background: none; color: inherit; font-size: 20px; cursor: pointer; }
+    #fisheye { position: fixed; z-index: 3; pointer-events: none; border-radius: 50%;
+      background: #10161e; box-shadow: 0 0 0 2px #9ddcc899, 0 8px 28px #00000080; }
+    #graph[aria-busy="true"] ~ #fisheye { visibility: hidden; }
     @media (max-width: 650px) {
       #controls { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px; }
       #controls select, #controls summary { min-height: 44px; }
@@ -67,22 +73,27 @@
   </style>
   <script src="assets/vendor/cytoscape-3.34.4.min.js"></script>
   <script src="assets/graph-controls.js?v=8df1ffa08ac1"></script>
+  <script src="assets/graph-fisheye.js?v=14df92aa6e0e"></script>
 </head>
 <body>
   <main id="graph" tabindex="0" aria-label="Projects" aria-busy="true"></main>
+  <canvas id="fisheye" hidden aria-hidden="true"></canvas>
   <section id="controls" aria-label="Graph appearance and connections" inert>
     <label><select id="color-by" aria-label="Color by"></select></label>
     <label><select id="size-by" aria-label="Size by"></select></label>
     <details id="edge-filter"><summary id="edge-summary">Include edges</summary><div id="edge-options" class="control-panel"></div></details>
     <details id="appearance-legend"><summary>Legend</summary><div id="legend-content" class="control-panel"></div></details>
   </section>
-  <nav id="views" aria-label="Graph view" inert>
+  <nav id="views" aria-label="Graph view and fisheye" inert>
     <a href="?view=curated" data-view="curated" aria-label="Curated" title="Curated">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 16-1 5 5-1L21 7l-4-4Z M14 6l4 4" /></svg>
     </a>
     <a href="?view=embedded" data-view="embedded" aria-label="Embedded" title="Embedded">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 6 14 1M5 6l6 13M19 7l-8 12" /><circle cx="5" cy="6" r="3" /><circle cx="19" cy="7" r="3" /><circle cx="11" cy="19" r="3" /></svg>
     </a>
+    <button id="fisheye-toggle" type="button" aria-label="Fisheye lens" aria-pressed="false" title="Fisheye">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6.5" /><path d="m15 15 6 6M6.5 10h7M10 6.5v7" /></svg>
+    </button>
   </nav>
   <aside id="node-info" role="dialog" aria-labelledby="node-info-name" hidden></aside>
   <script>
@@ -698,6 +709,7 @@
         positionTargets.clear();
         startLiveLayout();
       } });
+      attachGraphFisheye({ cy, graph });
       document.querySelectorAll('#views a').forEach(link => link.addEventListener('click', event => {
         if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
         event.preventDefault();

@@ -14,6 +14,7 @@ const files=new Map([
  ['/data/repos.json',['data/repos.json','application/json']],
  ['/data/neighborhoods.json',['data/neighborhoods.json','application/json']],
  ['/assets/graph-controls.js',['assets/graph-controls.js','text/javascript']],
+ ['/assets/graph-fisheye.js',['assets/graph-fisheye.js','text/javascript']],
  ['/assets/vendor/cytoscape-3.34.4.min.js',['assets/vendor/cytoscape-3.34.4.min.js','text/javascript']],
 ]);
 const server=createServer((req,res)=>{
