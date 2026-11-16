@@ -682,7 +682,7 @@
 
     async function initialize() {
       const parameters = new URLSearchParams(location.search);
-      const view = parameters.get('view') ?? 'embedded';
+      const view = parameters.get('view') ?? 'curated';
       if (view !== 'curated' && view !== 'embedded') {
         throw new Error('Choose view=curated or view=embedded.');
       }
@@ -791,7 +791,7 @@
         event.preventDefault();
         switchView(link.dataset.view);
       }));
-      addEventListener('popstate', () => switchView(new URLSearchParams(location.search).get('view') ?? 'embedded', true));
+      addEventListener('popstate', () => switchView(new URLSearchParams(location.search).get('view') ?? 'curated', true));
       if (savedLayout) {
         const camera = savedLayout.viewport;
         const scale = Math.min(cy.width() / camera.width, cy.height() / camera.height);
