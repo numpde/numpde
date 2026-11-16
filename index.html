@@ -32,7 +32,13 @@
     #controls > label { display: grid; gap: 4px; min-width: 0; }
     #controls select, #controls summary { width: 100%; min-height: 40px; padding: 8px;
       border: 1px solid var(--border); border-radius: 6px; color: inherit; background: var(--surface);
-      font: inherit; cursor: pointer; }
+      font: inherit; line-height: 20px; cursor: pointer; }
+    #controls summary { display: flex; align-items: center; gap: 6px; list-style: none; }
+    #controls summary::-webkit-details-marker { display: none; }
+    #controls summary::before { content: ''; flex: 0 0 auto;
+      border-top: 3px solid transparent; border-bottom: 3px solid transparent;
+      border-left: 5px solid currentColor; }
+    #controls details[open] > summary::before { transform: rotate(90deg); }
     #controls select:focus-visible, #controls summary:focus-visible,
     #controls button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     #controls details { min-width: 0; }
