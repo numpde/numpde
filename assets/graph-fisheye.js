@@ -259,9 +259,21 @@ function attachGraphFisheye({ cy, graph }) {
       y = Math.max(radius + 8, Math.min(innerHeight - radius - 8, y - radius - 32));
     }
     lens.style.left = x - radius + 'px'; lens.style.top = y - radius + 'px';
-    const scale = Math.min(pixelRatio * peakZoom, (renderer.atlasSize - 2 * renderer.tileSize) / diameter);
+    const maxScale = (renderer.atlasSize - 2 * renderer.tileSize) / diameter;
+    let scale = Math.min(pixelRatio * peakZoom, maxScale);
+    let modelScale = zoom * scale;
+    if (touches.size > 1 && renderer.modelScale !== null) {
+      // Reuse world-space pixels throughout a pinch instead of rebuilding
+      // every tile for each tiny zoom change. Rebase in powers of two to
+      // stay within the atlas and avoid excessive magnification blur.
+      const desiredScale = modelScale;
+      modelScale = renderer.modelScale;
+      while (modelScale / zoom > maxScale) modelScale /= 2;
+      while (modelScale < desiredScale / 2) modelScale *= 2;
+      scale = modelScale / zoom;
+    }
     updateTiles(graphRenderer, (focus.x - bounds.left - pan.x) * scale,
-      (focus.y - bounds.top - pan.y) * scale, radius, scale, zoom * scale);
+      (focus.y - bounds.top - pan.y) * scale, radius, scale, modelScale);
     const { gl } = renderer;
     gl.viewport(0, 0, size, size);
     gl.clear(gl.COLOR_BUFFER_BIT);
